@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pacific Rim Bistro</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="phone-frame">
+
+    <!-- ══ HOME ══ -->
+    <div class="screen active" id="screen-home">
+      <div class="home-hero">
+        <img src="img/hero.jpg" class="hero-photo" alt="Pacific Rim Bistro signature sushi roll"/>
+        <div class="hero-photo-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-top-row">
+            <div>
+              <div class="greeting">Welcome back</div>
+              <div class="hero-name">Pacific Rim<br>Bistro</div>
+              <div class="hero-sub">Downtown Atlanta · Pan-Asian &amp; Sushi</div>
+            </div>
+            <div class="hero-links">
+              <a href="pages/login.html" class="hero-link-btn">Sign In</a>
+              <a href="pages/admin.html" class="hero-link-btn admin-link">Admin</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="points-card">
+        <div class="points-left">
+          <div class="label">My Points</div>
+          <div class="value">1,240</div>
+          <div class="sub">260 pts until next reward</div>
+        </div>
+        <div>
+          <div class="label" style="font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:0.1em;margin-bottom:8px;">STAMPS</div>
+          <div class="stamp-row">
+            <div class="stamp filled"></div>
+            <div class="stamp filled"></div>
+            <div class="stamp filled"></div>
+            <div class="stamp filled"></div>
+            <div class="stamp"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Quick Menu</div>
+      <div class="quick-actions">
+        <div class="qa-btn" onclick="goTo('reservation')"><div class="qa-icon">🗓️</div>Reserve</div>
+        <div class="qa-btn" onclick="goTo('menu')"><div class="qa-icon">🍱</div>Order</div>
+        <div class="qa-btn" onclick="goTo('payment')"><div class="qa-icon">💳</div>Pay</div>
+        <div class="qa-btn" onclick="goTo('review')"><div class="qa-icon">✍️</div>Review</div>
+      </div>
+
+      <div class="section-title">Today's Picks</div>
+      <div class="featured-item" onclick="goTo('menu')">
+        <div>
+          <div class="fi-label">Chef's Special</div>
+          <div class="fi-name">Japanese Ceviche</div>
+          <div class="fi-price">$18.00</div>
+        </div>
+        <div class="fi-emoji">🐟</div>
+      </div>
+      <div class="featured-item" onclick="goTo('menu')">
+        <div>
+          <div class="fi-label">Guest Favorite</div>
+          <div class="fi-name">Coconut Soup</div>
+          <div class="fi-price">$14.00</div>
+        </div>
+        <div class="fi-emoji">🥥</div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- ══ RESERVATION ══ -->
+    <div class="screen" id="screen-reservation">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>Table Reservation</h1>
+        <p>Book up to 30 days in advance</p>
+      </div>
+      <div class="form-section">
+        <div class="form-group">
+          <label class="form-label">Select Date</label>
+          <div class="date-grid" id="date-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Time</label>
+          <div class="time-grid">
+            <div class="time-chip unavailable">11:30 AM</div>
+            <div class="time-chip" onclick="selectTime(this)">12:00 PM</div>
+            <div class="time-chip" onclick="selectTime(this)">12:30 PM</div>
+            <div class="time-chip" onclick="selectTime(this)">5:30 PM</div>
+            <div class="time-chip selected" onclick="selectTime(this)">6:00 PM</div>
+            <div class="time-chip" onclick="selectTime(this)">6:30 PM</div>
+            <div class="time-chip" onclick="selectTime(this)">7:00 PM</div>
+            <div class="time-chip unavailable">7:30 PM</div>
+            <div class="time-chip" onclick="selectTime(this)">8:00 PM</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Party Size</label>
+          <div class="guest-counter">
+            <button class="counter-btn" onclick="changeGuests(-1)">−</button>
+            <div class="counter-val" id="guest-count">2</div>
+            <button class="counter-btn" onclick="changeGuests(1)">+</button>
+            <span style="font-size:13px;color:var(--muted);margin-left:4px;">guests</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Requests</label>
+          <input type="text" class="form-input" placeholder="Window seat, birthday cake, allergies...">
+        </div>
+      </div>
+      <button class="cta-btn" onclick="showSuccess('reservation')">Confirm Reservation</button>
+    </div>
+
+    <!-- ══ MENU ══ -->
+    <div class="screen" id="screen-menu">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>Order</h1>
+        <p>Dine-in · Takeout</p>
+      </div>
+      <div style="height:12px"></div>
+      <div class="menu-tabs">
+        <div class="menu-tab active" onclick="switchTab(this,'sushi')">Sushi</div>
+        <div class="menu-tab" onclick="switchTab(this,'starters')">Starters</div>
+        <div class="menu-tab" onclick="switchTab(this,'entrees')">Entrées</div>
+        <div class="menu-tab" onclick="switchTab(this,'drinks')">Drinks</div>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-list" id="menu-list"></div>
+      <div class="cart-bar" id="cart-bar" onclick="goTo('payment')" style="display:none">
+        <div>
+          <div class="cart-info">Cart</div>
+          <div class="cart-count" id="cart-count">0 items</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cart-info">Total</div>
+          <div class="cart-count" id="cart-total">$0.00</div>
+        </div>
+        <div class="cart-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- ══ PAYMENT ══ -->
+    <div class="screen" id="screen-payment">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('menu')">← Back</div>
+        <h1>Checkout</h1>
+        <p>Auto-pay · Saved cards</p>
+      </div>
+      <div style="padding:16px 20px 8px"><div class="form-label">Order Summary</div></div>
+      <div class="order-summary">
+        <div class="os-row"><span>Japanese Ceviche</span><span>$18.00</span></div>
+        <div class="os-row"><span>Coconut Soup</span><span>$14.00</span></div>
+        <div class="os-row"><span>Salmon Roll (8pc)</span><span>$16.00</span></div>
+        <div class="os-row os-label"><span>Subtotal</span><span>$48.00</span></div>
+        <div class="os-row os-label"><span>Tax (8%)</span><span>$3.84</span></div>
+        <div class="os-row total"><span>Total</span><span>$51.84</span></div>
+      </div>
+      <div style="padding:0 20px 8px"><div class="form-label">Payment Method</div></div>
+      <div class="payment-methods">
+        <div class="pm-card selected" onclick="selectPM(this)">
+          <div class="pm-icon">💳</div>
+          <div><div class="pm-label">Visa **** 4242</div><div class="pm-sub">Auto-pay enabled</div></div>
+          <div class="pm-radio"></div>
+        </div>
+        <div class="pm-card" onclick="selectPM(this)">
+          <div class="pm-icon">📱</div>
+          <div><div class="pm-label">Apple Pay</div><div class="pm-sub">Authenticate with Face ID</div></div>
+          <div class="pm-radio"></div>
+        </div>
+        <div class="pm-card" onclick="selectPM(this)">
+          <div class="pm-icon">+</div>
+          <div><div class="pm-label">Add New Card</div><div class="pm-sub">Enter card details</div></div>
+          <div class="pm-radio"></div>
+        </div>
+      </div>
+      <div class="points-toggle">
+        <div class="pt-icon">✦</div>
+        <div class="pt-info">
+          <div class="pt-label">Use Points (1,240 pts available)</div>
+          <div class="pt-sub">500 pts = $5.00 discount</div>
+        </div>
+        <div class="toggle" id="pt-toggle" onclick="togglePoints()"></div>
+      </div>
+      <button class="cta-btn" onclick="showSuccess('payment')">Pay $51.84</button>
+    </div>
+
+    <!-- ══ REVIEW ══ -->
+    <div class="screen" id="screen-review">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>Leave a Review</h1>
+        <p>Visit on March 25, 2026</p>
+      </div>
+      <div style="padding:20px 20px 8px;text-align:center">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;margin-bottom:4px">Overall Experience</div>
+      </div>
+      <div class="review-stars" id="star-row">
+        <div class="star lit" onclick="rateStar(1)">⭐</div>
+        <div class="star lit" onclick="rateStar(2)">⭐</div>
+        <div class="star lit" onclick="rateStar(3)">⭐</div>
+        <div class="star lit" onclick="rateStar(4)">⭐</div>
+        <div class="star" onclick="rateStar(5)">⭐</div>
+      </div>
+      <div style="padding:8px 20px 12px"><div class="form-label">What did you enjoy?</div></div>
+      <div class="review-categories">
+        <div class="rc-btn selected" onclick="toggleRC(this)">🍣 Food Quality</div>
+        <div class="rc-btn" onclick="toggleRC(this)">🤝 Service</div>
+        <div class="rc-btn" onclick="toggleRC(this)">✨ Atmosphere</div>
+        <div class="rc-btn" onclick="toggleRC(this)">💰 Value</div>
+        <div class="rc-btn" onclick="toggleRC(this)">🌿 Freshness</div>
+        <div class="rc-btn" onclick="toggleRC(this)">⚡ Speed</div>
+      </div>
+      <div style="padding:0 20px 8px"><div class="form-label">Tell us more</div></div>
+      <textarea class="review-textarea" placeholder="How was your visit? (optional)"></textarea>
+      <button class="cta-btn" onclick="showSuccess('review')">Submit Review</button>
+    </div>
+
+    <!-- ══ SUCCESS ══ -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon" id="success-icon">🎉</div>
+      <div class="success-title" id="success-title">Reservation Confirmed!</div>
+      <div class="success-msg" id="success-msg">A confirmation text has been sent.</div>
+      <div class="earned-badge">
+        <div class="pts" id="earned-pts">+120 pts</div>
+        <div class="label">POINTS EARNED</div>
+      </div>
+      <button class="cta-btn" style="width:auto;padding:16px 40px" onclick="goTo('home')">Back to Home</button>
+    </div>
+
+    <!-- ══ BOTTOM NAV ══ -->
+    <div class="bottom-nav" id="bottom-nav">
+      <div class="nav-item active" id="nav-home" onclick="navGo('home')">
+        <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+      </div>
+      <div class="nav-item" id="nav-reservation" onclick="navGo('reservation')">
+        <div class="nav-icon">🗓️</div><div class="nav-label">Reserve</div>
+      </div>
+      <div class="nav-item" id="nav-menu" onclick="navGo('menu')">
+        <div class="nav-icon">🍱</div><div class="nav-label">Order</div>
+      </div>
+      <div class="nav-item" id="nav-payment" onclick="navGo('payment')">
+        <div class="nav-icon">💳</div><div class="nav-label">Pay</div>
+      </div>
+      <div class="nav-item" id="nav-review" onclick="navGo('review')">
+        <div class="nav-icon">✍️</div><div class="nav-label">Review</div>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
