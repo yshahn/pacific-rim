@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pacific Rim Bistro — Sign In</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/login.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body class="auth-body">
+<div class="auth-container">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-mark">PRB</div>
+      <div class="brand-name">Pacific Rim Bistro</div>
+      <div class="brand-sub">Downtown Atlanta · Pan-Asian & Sushi</div>
+    </div>
+    <div class="auth-quote">"Every visit, a new discovery."</div>
+    <div class="auth-perks">
+      <div class="perk"><span>✦</span> Earn points with every order</div>
+      <div class="perk"><span>🗓️</span> Priority table reservations</div>
+      <div class="perk"><span>🎁</span> Exclusive member rewards</div>
+      <div class="perk"><span>🔔</span> Real-time booking alerts</div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuth('login')">Sign In</div>
+        <div class="auth-tab" onclick="switchAuth('signup')">Create Account</div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="form-login">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="••••••••"/>
+        </div>
+        <div class="auth-options">
+          <label class="remember-me"><input type="checkbox"/> Remember me</label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <button class="cta-btn" onclick="doLogin()">Sign In</button>
+        <div class="auth-divider"><span>or continue with</span></div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="doLogin()">
+            <img src="https://www.google.com/favicon.ico" width="18"/> Google
+          </button>
+          <button class="social-btn" onclick="doLogin()">
+            <span>🍎</span> Apple
+          </button>
+        </div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div class="auth-form" id="form-signup">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" placeholder="John"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" placeholder="Doe"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-input" placeholder="+1 (404) 000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Min. 8 characters"/>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox"/>
+            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" checked/>
+            Receive reservation confirmations & special offers via SMS/Email
+          </label>
+        </div>
+        <button class="cta-btn" onclick="doLogin()">Create Account & Earn 100 pts</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchAuth(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  const idx = tab === 'login' ? 0 : 1;
+  document.querySelectorAll('.auth-tab')[idx].classList.add('active');
+  document.getElementById('form-' + tab).classList.add('active');
+}
+function doLogin() {
+  window.location.href = '../index.html';
+}
+</script>
+</body>
+</html>
