@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pacific Rim Bistro — Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/admin.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body class="admin-body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-mark-sm">PRB</div>
+    <div>
+      <div class="sidebar-title">Pacific Rim</div>
+      <div class="sidebar-sub">Admin Panel</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">OVERVIEW</div>
+    <div class="sidebar-item active" onclick="showTab('dashboard')">📊 Dashboard</div>
+    <div class="sidebar-item" onclick="showTab('reservations')">🗓️ Reservations</div>
+    <div class="sidebar-item" onclick="showTab('orders')">🍱 Orders</div>
+    <div class="nav-section-label">GUESTS</div>
+    <div class="sidebar-item" onclick="showTab('members')">👤 Members</div>
+    <div class="sidebar-item" onclick="showTab('notifications')">🔔 Notifications</div>
+    <div class="nav-section-label">SETTINGS</div>
+    <div class="sidebar-item" onclick="showTab('menu')">🍣 Menu Manager</div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../index.html" class="sidebar-item" style="color:var(--gold)">← Guest App</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="admin-main">
+
+  <!-- Top Bar -->
+  <div class="admin-topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-right">
+      <div class="topbar-date">Saturday, March 28, 2026</div>
+      <div class="admin-avatar">YH</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD TAB ══ -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🗓️</div>
+        <div class="stat-info">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Today's Reservations</div>
+        </div>
+        <div class="stat-badge up">+3 vs yesterday</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🍱</div>
+        <div class="stat-info">
+          <div class="stat-value">$2,840</div>
+          <div class="stat-label">Today's Revenue</div>
+        </div>
+        <div class="stat-badge up">+12%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-info">
+          <div class="stat-value">847</div>
+          <div class="stat-label">Total Members</div>
+        </div>
+        <div class="stat-badge up">+24 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-info">
+          <div class="stat-value">4.7</div>
+          <div class="stat-label">Avg. Rating</div>
+        </div>
+        <div class="stat-badge up">↑ 0.2</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Today's Reservations -->
+      <div class="admin-card">
+        <div class="card-header">
+          <div class="card-title">Today's Reservations</div>
+          <button class="card-btn" onclick="showTab('reservations')">View All</button>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Time</th><th>Guest</th><th>Party</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>5:30 PM</td><td>James Wilson</td><td>4</td><td><span class="badge confirmed">Confirmed</span></td></tr>
+            <tr><td>6:00 PM</td><td>Sarah Kim</td><td>2</td><td><span class="badge confirmed">Confirmed</span></td></tr>
+            <tr><td>6:00 PM</td><td>Mike Chen</td><td>6</td><td><span class="badge pending">Pending</span></td></tr>
+            <tr><td>6:30 PM</td><td>Lisa Park</td><td>3</td><td><span class="badge confirmed">Confirmed</span></td></tr>
+            <tr><td>7:00 PM</td><td>Tom Davis</td><td>2</td><td><span class="badge cancelled">Cancelled</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="admin-card">
+        <div class="card-header">
+          <div class="card-title">Recent Orders</div>
+          <button class="card-btn" onclick="showTab('orders')">View All</button>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>#1042</td><td>Salmon Roll, Coconut Soup</td><td>$30</td><td><span class="badge confirmed">Paid</span></td></tr>
+            <tr><td>#1041</td><td>Japanese Ceviche, Sake</td><td>$30</td><td><span class="badge confirmed">Paid</span></td></tr>
+            <tr><td>#1040</td><td>Pad Thai, Rainbow Roll</td><td>$41</td><td><span class="badge pending">Preparing</span></td></tr>
+            <tr><td>#1039</td><td>Tempura Combo</td><td>$21</td><td><span class="badge confirmed">Paid</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Top Menu Items -->
+      <div class="admin-card">
+        <div class="card-header"><div class="card-title">Top Menu Items Today</div></div>
+        <div class="menu-rank-list">
+          <div class="menu-rank-item">
+            <div class="rank-num">1</div>
+            <div class="rank-emoji">🐟</div>
+            <div class="rank-info"><div class="rank-name">Japanese Ceviche</div><div class="rank-count">24 orders</div></div>
+            <div class="rank-bar"><div class="rank-fill" style="width:90%"></div></div>
+          </div>
+          <div class="menu-rank-item">
+            <div class="rank-num">2</div>
+            <div class="rank-emoji">🥥</div>
+            <div class="rank-info"><div class="rank-name">Coconut Soup</div><div class="rank-count">19 orders</div></div>
+            <div class="rank-bar"><div class="rank-fill" style="width:72%"></div></div>
+          </div>
+          <div class="menu-rank-item">
+            <div class="rank-num">3</div>
+            <div class="rank-emoji">🍣</div>
+            <div class="rank-info"><div class="rank-name">Salmon Roll</div><div class="rank-count">17 orders</div></div>
+            <div class="rank-bar"><div class="rank-fill" style="width:64%"></div></div>
+          </div>
+          <div class="menu-rank-item">
+            <div class="rank-num">4</div>
+            <div class="rank-emoji">🍜</div>
+            <div class="rank-info"><div class="rank-name">Pad Thai</div><div class="rank-count">14 orders</div></div>
+            <div class="rank-bar"><div class="rank-fill" style="width:52%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latest Reviews -->
+      <div class="admin-card">
+        <div class="card-header"><div class="card-title">Latest Reviews</div></div>
+        <div class="review-list">
+          <div class="review-item">
+            <div class="review-header">
+              <div class="reviewer">Sarah K.</div>
+              <div class="review-stars-sm">⭐⭐⭐⭐⭐</div>
+            </div>
+            <div class="review-text">"Best sushi in downtown Atlanta. The ceviche is incredible!"</div>
+            <div class="review-date">Today, 7:42 PM</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <div class="reviewer">James W.</div>
+              <div class="review-stars-sm">⭐⭐⭐⭐</div>
+            </div>
+            <div class="review-text">"Great atmosphere, friendly staff. Coconut soup is a must."</div>
+            <div class="review-date">Today, 6:15 PM</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <div class="reviewer">Mike C.</div>
+              <div class="review-stars-sm">⭐⭐⭐⭐⭐</div>
+            </div>
+            <div class="review-text">"Came for a business dinner, everyone loved it. Will be back!"</div>
+            <div class="review-date">Yesterday, 8:30 PM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESERVATIONS TAB ══ -->
+  <div class="tab-content" id="tab-reservations">
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">All Reservations</div>
+        <div style="display:flex;gap:8px">
+          <select class="filter-select"><option>Today</option><option>This Week</option><option>This Month</option></select>
+          <button class="cta-btn-sm" onclick="sendNotif('all')">📨 Notify All</button>
+        </div>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>Date</th><th>Time</th><th>Guest</th><th>Phone</th><th>Party</th><th>Request</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td>Mar 28</td><td>5:30 PM</td><td>James Wilson</td><td>(404) 555-0101</td><td>4</td><td>Window seat</td><td><span class="badge confirmed">Confirmed</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('James')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 28</td><td>6:00 PM</td><td>Sarah Kim</td><td>(404) 555-0182</td><td>2</td><td>Birthday cake</td><td><span class="badge confirmed">Confirmed</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('Sarah')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 28</td><td>6:00 PM</td><td>Mike Chen</td><td>(404) 555-0234</td><td>6</td><td>—</td><td><span class="badge pending">Pending</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('Mike')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 28</td><td>6:30 PM</td><td>Lisa Park</td><td>(404) 555-0319</td><td>3</td><td>Gluten free</td><td><span class="badge confirmed">Confirmed</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('Lisa')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 28</td><td>7:00 PM</td><td>Tom Davis</td><td>(404) 555-0447</td><td>2</td><td>—</td><td><span class="badge cancelled">Cancelled</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('Tom')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 29</td><td>6:00 PM</td><td>Emily Johnson</td><td>(404) 555-0521</td><td>4</td><td>Patio seating</td><td><span class="badge confirmed">Confirmed</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('Emily')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+          <tr><td>Mar 29</td><td>7:30 PM</td><td>David Lee</td><td>(404) 555-0688</td><td>8</td><td>Private party</td><td><span class="badge pending">Pending</span></td><td><div class="action-btns"><button class="action-btn" onclick="sendNotif('David')">📨</button><button class="action-btn danger">✕</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ ORDERS TAB ══ -->
+  <div class="tab-content" id="tab-orders">
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">All Orders</div>
+        <select class="filter-select"><option>Today</option><option>This Week</option></select>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>Order #</th><th>Guest</th><th>Type</th><th>Items</th><th>Total</th><th>Points</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>#1042</td><td>Sarah Kim</td><td>Dine-in</td><td>Salmon Roll, Coconut Soup</td><td>$30.00</td><td>+75P</td><td><span class="badge confirmed">Paid</span></td></tr>
+          <tr><td>#1041</td><td>James Wilson</td><td>Dine-in</td><td>Japanese Ceviche, Premium Sake</td><td>$30.00</td><td>+75P</td><td><span class="badge confirmed">Paid</span></td></tr>
+          <tr><td>#1040</td><td>Mike Chen</td><td>Takeout</td><td>Pad Thai, Rainbow Roll</td><td>$41.00</td><td>+103P</td><td><span class="badge pending">Preparing</span></td></tr>
+          <tr><td>#1039</td><td>Lisa Park</td><td>Dine-in</td><td>Tempura Combo, Chardonnay</td><td>$34.00</td><td>+85P</td><td><span class="badge confirmed">Paid</span></td></tr>
+          <tr><td>#1038</td><td>Tom Davis</td><td>Takeout</td><td>Gyoza, Mongolian Beef</td><td>$33.00</td><td>+83P</td><td><span class="badge confirmed">Paid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ MEMBERS TAB ══ -->
+  <div class="tab-content" id="tab-members">
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">Member Directory</div>
+        <input type="text" class="filter-input" placeholder="Search members..."/>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Points</th><th>Visits</th><th>Joined</th><th>Tier</th></tr></thead>
+        <tbody>
+          <tr><td>Sarah Kim</td><td>sarah@email.com</td><td>(404) 555-0182</td><td>2,840</td><td>24</td><td>Jan 2025</td><td><span class="badge gold">Gold</span></td></tr>
+          <tr><td>James Wilson</td><td>james@email.com</td><td>(404) 555-0101</td><td>1,920</td><td>16</td><td>Mar 2025</td><td><span class="badge gold">Gold</span></td></tr>
+          <tr><td>Mike Chen</td><td>mike@email.com</td><td>(404) 555-0234</td><td>980</td><td>8</td><td>Jun 2025</td><td><span class="badge confirmed">Silver</span></td></tr>
+          <tr><td>Lisa Park</td><td>lisa@email.com</td><td>(404) 555-0319</td><td>540</td><td>5</td><td>Sep 2025</td><td><span class="badge pending">Bronze</span></td></tr>
+          <tr><td>Tom Davis</td><td>tom@email.com</td><td>(404) 555-0447</td><td>240</td><td>2</td><td>Jan 2026</td><td><span class="badge pending">Bronze</span></td></tr>
+          <tr><td>Emily Johnson</td><td>emily@email.com</td><td>(404) 555-0521</td><td>120</td><td>1</td><td>Mar 2026</td><td><span class="badge pending">Bronze</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS TAB ══ -->
+  <div class="tab-content" id="tab-notifications">
+    <div class="notif-grid">
+      <div class="admin-card">
+        <div class="card-header"><div class="card-title">Send Notification</div></div>
+        <div class="notif-form">
+          <div class="form-group">
+            <label class="form-label">Recipients</label>
+            <select class="form-input">
+              <option>All Members (847)</option>
+              <option>Gold Members (42)</option>
+              <option>Silver Members (186)</option>
+              <option>Bronze Members (619)</option>
+              <option>Reservations Today (12)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Channel</label>
+            <div class="channel-opts">
+              <label class="channel-opt selected"><input type="checkbox" checked/> 📧 Email</label>
+              <label class="channel-opt selected"><input type="checkbox" checked/> 📱 SMS</label>
+              <label class="channel-opt"><input type="checkbox"/> 🔔 Push</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Template</label>
+            <select class="form-input" onchange="fillTemplate(this.value)">
+              <option value="">— Select a template —</option>
+              <option value="reservation">Reservation Reminder</option>
+              <option value="promo">Special Promotion</option>
+              <option value="points">Points Expiry Alert</option>
+              <option value="new">New Menu Item</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" id="notif-msg" rows="4" placeholder="Type your message here..."></textarea>
+          </div>
+          <button class="cta-btn" style="margin:0" onclick="sendBroadcast()">Send Notification</button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header"><div class="card-title">Recent Sent</div></div>
+        <div class="notif-history">
+          <div class="notif-hist-item">
+            <div class="nh-icon">📧</div>
+            <div class="nh-info">
+              <div class="nh-title">Reservation Reminder</div>
+              <div class="nh-sub">Sent to 12 guests · Mar 28, 3:00 PM</div>
+            </div>
+            <div class="nh-stat">98% opened</div>
+          </div>
+          <div class="notif-hist-item">
+            <div class="nh-icon">📱</div>
+            <div class="nh-info">
+              <div class="nh-title">Weekend Special Promo</div>
+              <div class="nh-sub">Sent to 847 members · Mar 26, 10:00 AM</div>
+            </div>
+            <div class="nh-stat">64% opened</div>
+          </div>
+          <div class="notif-hist-item">
+            <div class="nh-icon">📧</div>
+            <div class="nh-info">
+              <div class="nh-title">New Menu: Cherry Blossom Roll</div>
+              <div class="nh-sub">Sent to 847 members · Mar 20, 9:00 AM</div>
+            </div>
+            <div class="nh-stat">71% opened</div>
+          </div>
+          <div class="notif-hist-item">
+            <div class="nh-icon">📱</div>
+            <div class="nh-info">
+              <div class="nh-title">Points Expiry Reminder</div>
+              <div class="nh-sub">Sent to 186 members · Mar 15, 11:00 AM</div>
+            </div>
+            <div class="nh-stat">82% opened</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MENU MANAGER TAB ══ -->
+  <div class="tab-content" id="tab-menu">
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">Menu Manager</div>
+        <button class="cta-btn-sm">+ Add Item</button>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Available</th><th>Orders Today</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td>🐟 Japanese Ceviche</td><td>Sushi</td><td>$18.00</td><td><div class="toggle-sm on"></div></td><td>24</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+          <tr><td>🍣 Salmon Roll</td><td>Sushi</td><td>$16.00</td><td><div class="toggle-sm on"></div></td><td>17</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+          <tr><td>🥥 Coconut Soup</td><td>Starters</td><td>$14.00</td><td><div class="toggle-sm on"></div></td><td>19</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+          <tr><td>🦐 Shrimp Tempura Roll</td><td>Sushi</td><td>$17.00</td><td><div class="toggle-sm on"></div></td><td>11</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+          <tr><td>🍜 Pad Thai</td><td>Entrées</td><td>$19.00</td><td><div class="toggle-sm on"></div></td><td>14</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+          <tr><td>🐠 Rainbow Roll</td><td>Sushi</td><td>$22.00</td><td><div class="toggle-sm"></div></td><td>0</td><td><div class="action-btns"><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- NOTIFICATION TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('topbar-title').textContent =
+    name.charAt(0).toUpperCase() + name.slice(1);
+  event.currentTarget.classList.add('active');
+}
+
+function sendNotif(guest) {
+  showToast(guest === 'all'
+    ? '📨 Notifications sent to all guests!'
+    : `📨 Notification sent to ${guest}!`);
+}
+
+function sendBroadcast() {
+  showToast('✅ Notification sent successfully!');
+}
+
+function fillTemplate(val) {
+  const templates = {
+    reservation: "Hi {name}! This is a reminder for your reservation at Pacific Rim Bistro today. We look forward to seeing you!",
+    promo: "🎉 Special offer this weekend! Enjoy 20% off all sushi rolls. Show this message to your server. Valid Fri-Sun only.",
+    points: "⚠️ Your {points} points expire in 30 days. Visit us soon to use them! Book a table: pacific-rim-six.vercel.app",
+    new: "🍣 New on our menu: Cherry Blossom Roll! Fresh salmon, yuzu cream, edible flowers. Available this week only.",
+  };
+  document.getElementById('notif-msg').value = templates[val] || '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
