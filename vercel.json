@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "functions": {
+    "api/checkout.js": {
+      "maxDuration": 10
+    },
+    "api/notify-order.js": {
+      "maxDuration": 10
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
