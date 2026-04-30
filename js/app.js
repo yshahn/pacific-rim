@@ -1320,7 +1320,7 @@ function checkPaymentResult() {
         fetch('/api/notify-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: pendingOrder,
+          body: JSON.stringify({...JSON.parse(pendingOrder), notifEmails: getNotifEmails(), notifPhones: getNotifPhones()}),
         }).then(r => r.json())
           .then(d => console.log('Notification sent:', d))
           .catch(e => console.warn('Notification failed:', e));
@@ -1659,4 +1659,16 @@ function reorder(items) {
   document.getElementById('bottom-nav').style.display = 'flex';
   setTimeout(() => goToCheckout(), 200);
 }
+function getNotifEmails() {
+  try {
+    const s = JSON.parse(localStorage.getItem('prb_notif_settings') || '{}');
+    return s.emails && s.emails.length ? s.emails : ['yshahn@gmail.com', 'pacificrimbistro@gmail.com'];
+  } catch(e) { return ['yshahn@gmail.com', 'pacificrimbistro@gmail.com']; }
+}
 
+function getNotifPhones() {
+  try {
+    const s = JSON.parse(localStorage.getItem('prb_notif_settings') || '{}');
+    return s.phones && s.phones.length ? s.phones : ['7705008420', '6788629389'];
+  } catch(e) { return ['7705008420', '6788629389']; }
+}
