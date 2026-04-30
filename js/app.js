@@ -1520,14 +1520,85 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-const { onRequest } = require("firebase-functions/v2/https");
-const https = require("https");
-exports.scanScorecard = onRequest({ cors: true, timeoutSeconds: 60 }, (req, res) => {
-  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
-  const body = JSON.stringify(req.body);
-  const options = { hostname: "api.anthropic.com", path: "/v1/messages", method: "POST", headers: { "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01", "Content-Length": Buffer.byteLength(body) } };
-  const apiReq = https.request(options, (apiRes) => { let data = ""; apiRes.on("data", (c) => { data += c; }); apiRes.on("end", () => { res.status(apiRes.statusCode).send(data); }); });
-  apiReq.on("error", (e) => { res.status(500).send(JSON.stringify({ error: e.message })); });
-  apiReq.write(body);
-  apiReq.end();
-});
+
+// ─────────────────────────────────
+// ORDER HISTORY
+// ─────────────────────────────────
+function showOrderHistory() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-order-history').classList.add('active');
+  document.getElementById('bottom-nav').style.display = 'none';
+  loadOrderHistory();
+}
+
+async function loadOrderHistory() {
+  const list = document.getElementById('order-history-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">Loading...</div>';
+
+  try {
+    const fbUrl = window.location.origin + '/js/firebase-menu.js';
+    const { loadOrdersFromFirebase } = await import(fbUrl);
+    const user = getUser();
+
+    if (!user?.email) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;"><div style="font-size:40px;margin-bottom:12px;">👤</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;margin-bottom:8px;">Sign in to view history</div><div style="font-size:13px;color:var(--muted);">Your past orders will appear here after signing in.</div></div>';
+      return;
+    }
+
+    const allOrders = await loadOrdersFromFirebase(200);
+    const myOrders  = allOrders.filter(o => o.customer?.email === user.email);
+
+    if (!myOrders.length) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;"><div style="font-size:40px;margin-bottom:12px;">🍣</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;margin-bottom:8px;">No orders yet</div><div style="font-size:13px;color:var(--muted);">Your order history will appear here.</div></div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    myOrders.forEach(order => {
+      const date = new Date(order.createdAt).toLocaleString('en-US', {
+        month:'short', day:'numeric', year:'numeric',
+        hour:'numeric', minute:'2-digit'
+      });
+      const items = order.orderItems || [];
+      const card  = document.createElement('div');
+      card.style.cssText = 'border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--warm-white);';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px;color:var(--muted);">${date}</div>
+            <div style="font-size:12px;color:var(--gold);margin-top:2px;">📦 ${order.pickupTime||'ASAP'} · #${order.orderId||'—'}</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold);">$${(order.total||0).toFixed(2)}</div>
+        </div>
+        <div style="margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+          ${items.map((it,i) => `
+            <div style="padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;${i<items.length-1?'border-bottom:1px solid var(--border);':''}background:var(--bone);">
+              <span>${it.emoji||'🍽️'} ${it.name}</span>
+              <span style="color:var(--muted);font-size:12px;">$${it.price.toFixed(2)}</span>
+            </div>`).join('')}
+        </div>
+        <button onclick='reorder(${JSON.stringify(items)})'
+          style="width:100%;padding:13px;background:var(--ink);color:var(--gold);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;">
+          🔄 Reorder
+        </button>`;
+      list.appendChild(card);
+    });
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">Could not load order history.</div>';
+    console.error(e);
+  }
+}
+
+function reorder(items) {
+  // Add all items to cart
+  items.forEach(item => {
+    addToCart(item.name, item.price, item.emoji || '🍽️', null);
+  });
+  // Go back to order screen and show checkout
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-order').classList.add('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  setTimeout(() => goToCheckout(), 200);
+}
+
