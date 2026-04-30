@@ -1520,3 +1520,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+const { onRequest } = require("firebase-functions/v2/https");
+const https = require("https");
+exports.scanScorecard = onRequest({ cors: true, timeoutSeconds: 60 }, (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  const body = JSON.stringify(req.body);
+  const options = { hostname: "api.anthropic.com", path: "/v1/messages", method: "POST", headers: { "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01", "Content-Length": Buffer.byteLength(body) } };
+  const apiReq = https.request(options, (apiRes) => { let data = ""; apiRes.on("data", (c) => { data += c; }); apiRes.on("end", () => { res.status(apiRes.statusCode).send(data); }); });
+  apiReq.on("error", (e) => { res.status(500).send(JSON.stringify({ error: e.message })); });
+  apiReq.write(body);
+  apiReq.end();
+});
