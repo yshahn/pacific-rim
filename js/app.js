@@ -1008,27 +1008,85 @@ async function confirmReservation() {
   showSuccess('reservation');
 }
 
+// ── RESERVATION TIME GRID - replace buildDates() and add buildTimeSlots()
+// In app.js, find buildDates() and replace with this:
+
 function buildDates() {
   const grid = document.getElementById('date-grid');
   if (!grid) return;
-  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now  = new Date();
   grid.innerHTML = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(now);
-    d.setDate(now.getDate() + i);
+  const today = new Date();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
     const cell = document.createElement('div');
-    cell.className = 'date-cell' + (i===0?' today':'') + (i===1?' selected':'');
-    cell.dataset.date = months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-    cell.innerHTML = '<span class="day-name">' + days[d.getDay()] + '</span>' + d.getDate();
-    cell.addEventListener('click', () => {
+    cell.className = 'date-cell' + (i === 0 ? ' selected' : '');
+    cell.dataset.date = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    cell.innerHTML = `
+      <div class="dc-day">${d.toLocaleDateString('en-US',{weekday:'short'})}</div>
+      <div class="dc-num">${d.getDate()}</div>
+      <div class="dc-mon">${d.toLocaleDateString('en-US',{month:'short'})}</div>`;
+    cell.addEventListener('click', function() {
       document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected'));
-      cell.classList.add('selected');
+      this.classList.add('selected');
     });
     grid.appendChild(cell);
   }
+  buildTimeSlots();
 }
+
+function buildTimeSlots() {
+  const grid = document.querySelector('.time-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  // Lunch: 11:30 AM - 1:30 PM (15 min intervals)
+  // Dinner: 5:00 PM - 8:30 PM (15 min intervals)
+  const slots = [];
+
+  // Lunch slots
+  for (let h = 11; h <= 13; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 11 && m < 30) continue; // start at 11:30
+      if (h === 13 && m > 30) continue; // end at 1:30
+      slots.push({ h, m, label: 'Lunch' });
+    }
+  }
+
+  // Dinner slots
+  for (let h = 17; h <= 20; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 20 && m > 30) continue; // end at 8:30
+      slots.push({ h, m, label: 'Dinner' });
+    }
+  }
+
+  let lastLabel = '';
+  slots.forEach((slot, i) => {
+    // Add section header
+    if (slot.label !== lastLabel) {
+      const header = document.createElement('div');
+      header.style.cssText = 'width:100%;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;padding:8px 0 4px;';
+      header.textContent = slot.label;
+      grid.appendChild(header);
+      lastLabel = slot.label;
+    }
+
+    const d = new Date();
+    d.setHours(slot.h, slot.m);
+    const label = d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+
+    const chip = document.createElement('div');
+    chip.className = 'time-chip' + (i === 0 ? ' selected' : '');
+    chip.textContent = label;
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+    grid.appendChild(chip);
+  });
+}
+
 
 function changeGuests(delta) {
   guestCount = Math.max(1, Math.min(20, guestCount + delta));
