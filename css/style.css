@@ -795,3 +795,17 @@ body {
   margin-right: 0;
   width: 100%;
 }
+/* ─── GIFT CARD ─── */
+.gc-amount-btn {
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--warm-white);
+}
+.gc-amount-btn:hover { border-color: var(--gold-light); }
+.gc-amount-btn.selected {
+  border-color: var(--gold);
+  background: rgba(200,169,110,0.06);
+}
