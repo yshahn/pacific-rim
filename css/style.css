@@ -809,3 +809,47 @@ body {
   border-color: var(--gold);
   background: rgba(200,169,110,0.06);
 }
+/* ─── QUICK ACTIONS - CENTER ALIGN (3 items) ─── */
+.quick-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 20px 24px;
+}
+.qa-btn {
+  width: calc(25% - 8px);
+  min-width: 72px;
+  max-width: 90px;
+  flex: 0 0 auto;
+}
+
+/* ─── TODAY'S PICKS - FULL WIDTH ─── */
+#todays-picks-container {
+  padding: 0 20px;
+}
+#todays-picks-container .featured-item {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+}
+
+/* ─── POINTS CARD UPGRADE ─── */
+.points-card {
+  background: linear-gradient(135deg, #c8a96e 0%, #a07840 50%, #8a6430 100%) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+.points-card .points-left .value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px !important;
+  font-weight: 500;
+  color: #fff !important;
+  line-height: 1 !important;
+}
+.points-card .label {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+/* ─── TIP GRID - 5 buttons ─── */
+.tip-grid { grid-template-columns: repeat(5, 1fr); }
