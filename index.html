@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pacific Rim Bistro</title>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0f0e0c"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Pacific Rim"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="phone-frame">
+
+    <!-- ══ HOME ══ -->
+    <div class="screen active" id="screen-home" style="overflow:hidden;min-height:0;">
+      <div class="scroll-container">
+      <div class="home-hero">
+        <img src="hero.jpg" class="hero-photo" alt="Pacific Rim Bistro"/>
+        <div class="hero-photo-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-top-row">
+            <div>
+              <div class="greeting" id="hero-greeting">Welcome back</div>
+              <div class="hero-name">Pacific Rim<br>Bistro</div>
+              <div class="hero-sub">Downtown Atlanta · Pan-Asian &amp; Sushi</div>
+            </div>
+            <div class="hero-links">
+              <a id="btn-signin" href="login.html" class="hero-link-btn">Sign In</a>
+              <a href="pages/admin.html" class="hero-link-btn admin-link" id="btn-admin" style="display:none;">Admin</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POINTS CARD -->
+      <div style="margin:-20px 20px 0;position:relative;z-index:10;border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+        <!-- Dark base -->
+        <div style="background:linear-gradient(135deg,#1a1612 0%,#0f0e0c 60%,#1e1a14 100%);padding:20px 22px 18px;position:relative;overflow:hidden;">
+
+          <!-- Glowing gold blob top-right -->
+          <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,110,0.25) 0%,transparent 70%);top:-60px;right:-40px;pointer-events:none;"></div>
+          <!-- Subtle gold blob bottom-left -->
+          <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,110,0.12) 0%,transparent 70%);bottom:-30px;left:20px;pointer-events:none;"></div>
+
+          <!-- Gold top border line -->
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8a96e,transparent);"></div>
+
+          <!-- Content row -->
+          <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;">
+
+            <!-- Left -->
+            <div>
+              <div style="font-size:9px;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:0.9;">✦ My Points</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+                <div id="home-points" style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:500;color:#fff;line-height:1;letter-spacing:-0.02em;">0</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.45);padding-bottom:6px;">pts</div>
+              </div>
+              <div id="home-points-sub" style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:0.03em;">Sign in to earn points</div>
+            </div>
+
+            <!-- Divider -->
+            <div style="width:1px;height:60px;background:linear-gradient(to bottom,transparent,rgba(200,169,110,0.4),transparent);margin:0 16px;"></div>
+
+            <!-- Right -->
+            <div style="text-align:right;">
+              <div style="font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:0.9;">Cash Value</div>
+              <div id="home-points-value" style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:400;color:var(--gold);line-height:1;">$0.00</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:0.05em;">100 pts = $1.00</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Curbside Announcement -->
+      <div style="margin:16px 20px 0;background:linear-gradient(135deg,#0f0e0c,#1a1612);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;border:1px solid rgba(200,169,110,0.3);">
+        <div style="font-size:22px;flex-shrink:0;">🚗</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--gold);letter-spacing:0.03em;">Curbside Pick Up Available Now</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">Order online · Pull up · We bring it out</div>
+        </div>
+        <div style="margin-left:auto;font-size:18px;color:var(--gold);">✦</div>
+      </div>
+
+      <div class="section-title">Quick Menu</div>
+      <div class="quick-actions">
+        <div class="qa-btn" onclick="goTo('reservation')"><div class="qa-icon">🗓️</div>Reserve</div>
+        <div class="qa-btn" onclick="goTo('order')"><div class="qa-icon">🍱</div>Order</div>
+<div class="qa-btn" onclick="goTo('rewards')"><div class="qa-icon">🎁</div>Rewards</div>
+        <div class="qa-btn" onclick="openDoorDash()"><div class="qa-icon">🛵</div>Delivery</div>
+      </div>
+
+      <div class="section-title">Today's Picks</div>
+      <div id="todays-picks-container"></div>
+      <div style="flex:1"></div>
+      </div><!-- end scroll container -->
+    </div>
+
+    <!-- ══ RESERVATION ══ -->
+    <div class="screen scroll-container" id="screen-reservation" style="flex:1;">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>Table Reservation</h1>
+        <p>Book up to 30 days in advance</p>
+      </div>
+
+      <!-- My Reservations -->
+      <div style="padding:16px 20px 4px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:12px;">My Reservations</div>
+        <div id="my-reservations-list"></div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:8px 20px 16px;"></div>
+
+      <div style="padding:0 20px;">
+        <div class="form-group">
+          <label class="form-label">Select Date</label>
+          <div class="date-grid" id="date-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Time</label>
+          <div class="time-grid" id="time-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Party Size</label>
+          <div class="guest-counter">
+            <button class="counter-btn" onclick="changeGuests(-1)">−</button>
+            <div class="counter-val" id="guest-count">2</div>
+            <button class="counter-btn" onclick="changeGuests(1)">+</button>
+            <span style="font-size:13px;color:var(--muted);margin-left:4px;">guests</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Requests</label>
+          <input type="text" id="res-special" class="form-input" placeholder="Window seat, birthday cake, allergies..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input type="text" id="res-name" class="form-input" placeholder="Full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" id="res-phone" class="form-input" placeholder="(404) 000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="res-email" class="form-input" placeholder="you@example.com"/>
+        </div>
+      </div>
+      <!-- SMS Consent for Reservation -->
+      <div style="padding:0 20px 12px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--muted);line-height:1.5;">
+          <input type="checkbox" id="sms-consent-res" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:var(--gold);"/>
+          <span>I agree to receive reservation confirmation and reminder text messages from Pacific Rim Bistro. Message & data rates may apply. Reply STOP to opt out. <a href="/privacy-policy" style="color:var(--gold);">Privacy Policy</a></span>
+        </label>
+      </div>
+      <button class="cta-btn" onclick="confirmReservation()">Confirm Reservation</button>
+    </div>
+
+    <!-- ══ ORDER + CHECKOUT (통합) ══ -->
+    <div class="screen" id="screen-order" style="flex-direction:column; overflow:hidden;">
+      <div class="screen-header" style="position:relative;flex-shrink:0;">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1 id="order-screen-title">Order</h1>
+        <p id="order-screen-sub">Select your items</p>
+        <!-- Order History Button + Hours -->
+        <div style="position:absolute;right:16px;top:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <button onclick="showOrderHistory()" style="background:none;border:1.5px solid var(--gold);color:var(--gold);border-radius:20px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.05em;">🕐 History</button>
+          <div style="font-size:9px;color:rgba(255,255,255,0.5);text-align:right;line-height:1.6;">
+            <div>🌞 Lunch: Mon–Fri 11:30AM–2PM</div>
+            <div>🌙 Dinner: Mon–Sat 5–9PM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1: MENU -->
+      <div id="step-menu" style="display:flex; flex-direction:column; flex:1; overflow:hidden; min-height:0;">
+        <div class="menu-tabs" id="menu-tabs-container" style="flex-shrink:0;">
+          <div class="menu-tab" onclick="switchTab(this,'lunch')">🌞 Lunch</div>
+          <div class="menu-tab active" onclick="switchTab(this,'appetizers')">🥢 Appetizers</div>
+          <div class="menu-tab" onclick="switchTab(this,'soups')">🥗 Soups & Salads</div>
+          <div class="menu-tab" onclick="switchTab(this,'entrees')">🍛 Kitchen Entrees</div>
+          <div class="menu-tab" onclick="switchTab(this,'rolls')">🍣 Sushi Rolls</div>
+          <div class="menu-tab" onclick="switchTab(this,'nigiri')">🍙 Nigiri & Sashimi</div>
+          <div class="menu-tab" onclick="switchTab(this,'drinks')">🥤 Drinks</div>
+          <div class="menu-tab" onclick="switchTab(this,'sides')">🧂 Sides</div>
+        </div>
+        <!-- Cart bar + lunch notice — fixed, does not scroll -->
+        <div style="flex-shrink:0;">
+          <div class="cart-bar" id="cart-bar" style="display:none; margin:8px 16px 0; border-radius:14px;" onclick="goToCheckout()">
+            <div>
+              <div class="cart-info">Cart</div>
+              <div class="cart-count" id="cart-count">0 items</div>
+            </div>
+            <div style="text-align:right">
+              <div class="cart-info">Total</div>
+              <div class="cart-count" id="cart-total">$0.00</div>
+            </div>
+            <div class="cart-arrow">→ Checkout</div>
+          </div>
+          <div id="lunch-notice" style="display:none; margin:8px 20px 0; padding:10px 14px; background:#fdf8f0; border:1px solid var(--gold-light); border-radius:10px; font-size:11px; color:var(--muted);">
+            🕐 Lunch served Mon–Fri · 11:30 AM – 2:00 PM
+          </div>
+          <div class="menu-divider"></div>
+        </div>
+        <!-- Menu list — scrollable -->
+        <div class="menu-list" id="menu-list"></div>
+      </div>
+
+      <!-- STEP 2: CHECKOUT -->
+      <div id="step-checkout" style="display:none; flex-direction:column; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;">
+
+        <div style="padding:16px 20px 4px;display:flex;gap:10px;align-items:center;">
+          <button class="back-to-menu-btn" onclick="backToMenu()">← Back to Menu</button>
+          <button onclick="goTo('home')" style="background:none;border:1px solid var(--border);border-radius:20px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;">🏠 Continue Shopping</button>
+        </div>
+
+        <!-- Auto-fill badge -->
+        <div class="gi-autofill-badge" id="gi-badge" style="display:none; margin:8px 20px;">
+          ✦ Info auto-filled from your account
+        </div>
+
+        <!-- Guest Info -->
+        <div style="padding:8px 20px 4px"><div class="form-label">Your Information</div></div>
+        <div class="guest-info-card">
+          <div class="gi-row">
+            <div class="gi-field">
+              <div class="form-label">First Name</div>
+              <input type="text" class="form-input" id="gi-firstname" placeholder="First Name"/>
+            </div>
+            <div class="gi-field">
+              <div class="form-label">Last Name</div>
+              <input type="text" class="form-input" id="gi-lastname" placeholder="Last Name"/>
+            </div>
+          </div>
+          <div class="gi-row">
+            <div class="gi-field">
+              <div class="form-label">Phone</div>
+              <input type="tel" class="form-input" id="gi-phone" placeholder="+1 (404) 000-0000"/>
+            </div>
+            <div class="gi-field">
+              <div class="form-label">Email</div>
+              <input type="email" class="form-input" id="gi-email" placeholder="you@example.com"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pickup Time -->
+        <div style="padding:12px 20px 4px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+          <div class="form-label">Pickup Time</div>
+          <div style="font-size:10px;color:#e07000;font-weight:500;">⚠️ Not available 2PM – 5PM</div>
+        </div>
+        <div style="padding:0 20px 8px;">
+          <div id="pickup-time-slots" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- Curbside Checkbox -->
+        <div style="padding:4px 20px 8px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted);">
+            <input type="checkbox" id="curbside-checkbox" onchange="toggleCurbside(this.checked)" style="width:15px;height:15px;accent-color:var(--gold);flex-shrink:0;"/>
+            <span>🚗 Curbside Pickup</span>
+          </label>
+          <div id="curbside-info" style="display:none;margin-top:8px;">
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input type="text" id="car-model" class="form-input" placeholder="Car model (e.g. Camry)" style="flex:1;padding:10px 12px;font-size:13px;"/>
+              <input type="text" id="car-color" class="form-input" placeholder="Color" style="width:90px;padding:10px 12px;font-size:13px;"/>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.5;">
+              🚗 When you arrive, tap <strong>Order History → I Have Arrived</strong> to notify us and we'll bring your order out!
+            </div>
+          </div>
+        </div>
+
+        <!-- Special Request -->
+        <div style="padding:12px 20px 4px"><div class="form-label">Special Requests</div></div>
+        <div style="padding:0 20px 8px;">
+          <textarea id="checkout-special-request" class="form-input" rows="2" placeholder="Allergies, special instructions, extra sauce..." style="resize:none;font-size:13px;"></textarea>
+        </div>
+
+
+
+        <!-- Editable Cart -->
+        <div style="padding:12px 20px 4px"><div class="form-label">Your Order</div></div>
+        <div id="cart-edit-list" style="padding:0 20px;"></div>
+
+        <!-- Tip -->
+        <div style="padding:12px 20px 4px"><div class="form-label">Add a Tip</div></div>
+        <div class="tip-section">
+          <div class="tip-grid">
+            <div class="tip-btn" onclick="selectTip(this, 0)" id="tip-no-btn">0%</div>
+            <div class="tip-btn" onclick="selectTip(this, 10)">10%</div>
+            <div class="tip-btn" onclick="selectTip(this, 15)">15%</div>
+            <div class="tip-btn selected" onclick="selectTip(this, 20)">20%</div>
+            <div class="tip-btn" onclick="selectTip(this, 0)" id="tip-custom-btn">Custom</div>
+          </div>
+          <div class="tip-custom-wrap" id="tip-custom-wrap" style="display:none !important;">
+            <span class="tip-dollar">$</span>
+            <input type="number" class="tip-custom-input" id="tip-custom-input"
+              placeholder="0.00" min="0" step="0.01"
+              oninput="setCustomTip(this.value)"/>
+          </div>
+          <div class="tip-amount" id="tip-amount">Tip: $0.00</div>
+        </div>
+
+        <!-- Order Totals -->
+        <div class="order-summary" id="checkout-summary" style="margin-top:8px;"></div>
+
+        <!-- Payment Method -->
+        <div style="padding:12px 20px 4px"><div class="form-label">Payment Method</div></div>
+        <div class="payment-methods" id="payment-methods">
+          <div class="pm-card" onclick="selectPM(this)" data-type="applepay">
+            <div class="pm-icon">📱</div>
+            <div><div class="pm-label">Apple Pay</div><div class="pm-sub">Face ID authentication</div></div>
+            <div class="pm-radio"></div>
+          </div>
+          <div class="pm-card selected" onclick="selectPM(this)" data-type="newcard">
+            <div class="pm-icon">💳</div>
+            <div><div class="pm-label">Credit / Debit Card</div><div class="pm-sub">Enter card at checkout</div></div>
+            <div class="pm-radio"></div>
+          </div>
+        </div>
+
+        <!-- Points -->
+        <div id="points-redeem-section" style="margin:0 20px 12px;display:none;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="font-size:16px;">✦</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;" id="pt-label">Redeem Points</div>
+              <div style="font-size:11px;color:var(--muted);" id="pt-sub">500 pts = $5.00</div>
+            </div>
+          </div>
+          <div id="points-redeem-btns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- SMS Consent -->
+        <div style="padding:0 20px 12px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--muted);line-height:1.5;">
+            <input type="checkbox" id="sms-consent" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:var(--gold);"/>
+            <span>I agree to receive order confirmation and reservation reminder text messages from Pacific Rim Bistro. Message & data rates may apply. Reply STOP to opt out. <a href="/privacy-policy" style="color:var(--gold);">Privacy Policy</a> · <a href="/terms" style="color:var(--gold);">Terms</a></span>
+          </label>
+        </div><button class="cta-btn" id="pay-btn" onclick="startStripeCheckout()">Pay</button>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ══ ORDER HISTORY ══ -->
+    <div class="screen scroll-container" id="screen-order-history" style="flex:1;">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('order')">← Back</div>
+        <h1>Order History</h1>
+        <p>Your past orders</p>
+      </div>
+      <div id="order-history-list" style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;"></div>
+    </div><!-- ══ REWARDS ══ -->
+    <div class="screen" id="screen-rewards" style="flex:1;min-height:0;overflow:hidden;">
+      <div class="screen-header" style="flex-shrink:0;">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>My Rewards</h1>
+        <p>Earn points with every order</p>
+      </div>
+      <div class="scroll-container">
+
+      <!-- Points Balance -->
+      <div class="rewards-hero" id="rewards-hero">
+        <div class="rh-left">
+          <div class="rh-label">Current Balance</div>
+          <div class="rh-points" id="rh-points">0</div>
+          <div class="rh-sub" id="rh-sub">Sign in to view your points</div>
+        </div>
+        <div class="rh-right">
+          <div style="font-size:9px;letter-spacing:0.15em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:4px;">Cash Value</div>
+          <div id="rh-cash-value" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;color:var(--gold);line-height:1;">$0.00</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:0.05em;">100 pts = $1.00</div>
+        </div>
+      </div>
+
+      <!-- Tier reset notice -->
+      <div id="rewards-reset" style="margin:0 20px 12px;font-size:11px;color:var(--muted);text-align:center;letter-spacing:0.03em;"></div>
+
+      <!-- Member Tiers -->
+      <div class="rewards-section-title">Member Tiers</div>
+      <div id="rewards-tiers" style="margin:0 20px 16px;"></div>
+
+      <!-- How to Earn -->
+      <div class="rewards-section-title">How to Earn</div>
+      <div class="earn-list">
+        <div class="earn-item">
+          <div class="earn-icon">🎁</div>
+          <div class="earn-info">
+            <div class="earn-title">Sign Up Bonus</div>
+            <div class="earn-desc">Get 200 points when you create an account</div>
+          </div>
+          <div class="earn-pts">+200</div>
+        </div>
+        <div class="earn-item">
+          <div class="earn-icon">🍱</div>
+          <div class="earn-info">
+            <div class="earn-title">Every Order</div>
+            <div class="earn-desc">Earn points based on your tier (2%–4%)</div>
+          </div>
+          <div class="earn-pts">2–4%</div>
+        </div>
+
+      </div>
+
+      <!-- Points History -->
+      <div class="rewards-section-title">Recent Activity</div>
+      <div id="points-history" style="margin:0 20px 24px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+        <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Sign in to view your points history</div>
+      </div>
+
+      <div style="height:24px"></div>
+      </div><!-- end scroll container -->
+    </div>
+
+    <!-- ══ MULTI-SELECT MODAL ══ -->
+    <!-- ══ TOPPINGS MODAL ══ -->
+    <div id="topping-modal" style="display:none;position:fixed;inset:0;background:rgba(15,14,12,0.75);z-index:9999;align-items:flex-end;justify-content:center;">
+      <div style="background:#faf7f2;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;">
+        <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div>
+            <div id="topping-modal-title" style="font-family:'Cormorant Garamond',serif;font-size:20px;"></div>
+            <div id="topping-modal-price" style="font-size:13px;color:var(--gold);font-weight:600;margin-top:2px;"></div>
+          </div>
+          <button onclick="closeToppingModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">✕</button>
+        </div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">🧂 Add Toppings (Optional)</div>
+        <div id="topping-modal-body" style="overflow-y:auto;flex:1;margin-bottom:16px;"></div>
+        <button onclick="confirmToppingCart()" id="topping-confirm-btn" style="width:100%;padding:16px;background:var(--ink);color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Add to Cart</button>
+        <button onclick="closeToppingModal()" style="width:100%;padding:12px;background:none;border:1px solid #ddd;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;margin-top:8px;">Cancel</button>
+      </div>
+    </div>
+
+        <div id="ms-modal" style="display:none; position:fixed; inset:0; background:rgba(15,14,12,0.75); z-index:9999; align-items:flex-end; justify-content:center;">
+      <div style="background:var(--warm-white); border-radius:24px 24px 0 0; padding:24px 20px 32px; width:100%; max-width:390px; max-height:85vh; display:flex; flex-direction:column;">
+        <div style="width:36px; height:4px; background:#ddd; border-radius:2px; margin:0 auto 16px;"></div>
+        <div id="ms-modal-title" style="font-family:'Cormorant Garamond',serif; font-size:20px; margin-bottom:2px;"></div>
+        <div id="ms-modal-price" style="font-size:14px; color:var(--gold); font-weight:600; margin-bottom:16px;"></div>
+        <div id="ms-modal-body" style="overflow-y:auto; flex:1; margin-bottom:16px;"></div>
+        <button id="ms-add-btn" onclick="confirmMultiSelect()" style="width:100%; padding:14px; background:var(--ink); color:var(--gold); border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;">Add to Cart</button>
+        <button onclick="closeMultiSelectModal()" style="width:100%; padding:12px; background:none; border:1px solid #ddd; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); cursor:pointer; margin-top:8px;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ══ OPTIONS POPUP ══ -->
+    <div id="options-popup" style="display:none; position:fixed; inset:0; background:rgba(15,14,12,0.75); z-index:9999; align-items:flex-end; justify-content:center;">
+      <div style="background:var(--warm-white); border-radius:24px 24px 0 0; padding:28px 24px 36px; width:100%; max-width:390px;">
+        <div style="width:36px; height:4px; background:#ddd; border-radius:2px; margin:0 auto 20px;"></div>
+        <div id="options-popup-title" style="font-family:'Cormorant Garamond',serif; font-size:22px; margin-bottom:4px;"></div>
+        <div id="options-popup-desc" style="font-size:12px; color:var(--muted); margin-bottom:20px; line-height:1.5;"></div>
+        <div style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Choose your protein</div>
+        <div id="options-popup-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;"></div>
+        <button onclick="closeOptionsPopup()" style="width:100%; padding:14px; background:none; border:1px solid #ddd; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ══ LUNCH CLOSED POPUP ══ -->
+    <div id="lunch-closed-popup" style="display:none; position:fixed; inset:0; background:rgba(15,14,12,0.7); z-index:9999; align-items:center; justify-content:center; padding:32px;">
+      <div style="background:var(--warm-white); border-radius:20px; padding:32px 24px; text-align:center; width:100%; max-width:300px;">
+        <div style="font-size:48px; margin-bottom:12px;">🕐</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:22px; margin-bottom:12px;">Lunch Not Available</div>
+        <div id="lunch-closed-msg" style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:24px; white-space:pre-line;"></div>
+        <div style="font-size:12px; color:var(--muted); background:var(--bone); border-radius:10px; padding:10px 14px; margin-bottom:20px;">
+          🌞 Lunch · Mon–Fri · 11:30 AM – 2:00 PM
+        </div>
+        <button onclick="document.getElementById('lunch-closed-popup').style.display='none'" style="width:100%; padding:14px; background:var(--ink); color:var(--gold); border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;">
+          Got it
+        </button>
+      </div>
+    </div><!-- ══ SUCCESS ══ -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon" id="success-icon">🎉</div>
+      <div class="success-title" id="success-title">Done!</div>
+      <div class="success-msg" id="success-msg"></div>
+      <div class="earned-badge">
+        <div class="pts" id="earned-pts"></div>
+        <div class="label" id="earned-label">POINTS EARNED</div>
+      </div>
+      <div id="arrived-section" style="display:none;margin:0 20px 12px;">
+        <button onclick="sendArrivedMessage()"
+          style="width:100%;padding:16px;background:#27ae60;color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;font-weight:600;">
+          🚗 I Have Arrived!
+        </button>
+        <div id="arrived-status" style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;"></div>
+      </div>
+      <button class="cta-btn" style="width:auto;padding:16px 40px" onclick="goTo('home')">Back to Home</button>
+    </div>
+
+    <!-- ══ PROFILE ══ -->
+    <div class="screen scroll-container" id="screen-profile" style="flex:1;">
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">← Back</div>
+        <h1>My Profile</h1>
+        <p>Manage your information</p>
+      </div>
+      <div style="padding:20px;">
+        <div style="text-align:center; margin-bottom:28px;">
+          <div id="profile-avatar" style="width:80px;height:80px;border-radius:50%;background:var(--ink);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">👤</div>
+          <div id="profile-name-display" style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:2px;">Guest</div>
+          <div id="profile-email-display" style="font-size:12px;color:var(--muted);">Not signed in</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" id="pf-firstname" class="form-input" placeholder="First name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" id="pf-lastname" class="form-input" placeholder="Last name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="pf-email" class="form-input" placeholder="your@email.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="pf-phone" class="form-input" placeholder="(404) 000-0000"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <input type="text" id="pf-address" class="form-input" placeholder="Street address"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input type="text" id="pf-city" class="form-input" placeholder="City"/>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">State</label>
+              <input type="text" id="pf-state" class="form-input" placeholder="GA" maxlength="2"/>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">ZIP</label>
+              <input type="text" id="pf-zip" class="form-input" placeholder="30303" maxlength="5"/>
+            </div>
+          </div>
+        </div>
+        <button onclick="saveProfile()" class="cta-btn" style="margin-top:24px;">Save Changes</button>
+        <div style="margin-top:16px; text-align:center;">
+          <button onclick="signOutAndClear()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline;">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BOTTOM NAV ══ -->
+    <div class="bottom-nav" id="bottom-nav">
+      <div class="nav-item active" id="nav-home" onclick="navGo('home')">
+        <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+      </div>
+      <div class="nav-item" id="nav-reservation" onclick="navGo('reservation')">
+        <div class="nav-icon">🗓️</div><div class="nav-label">Reserve</div>
+      </div>
+      <div class="nav-item" id="nav-order" onclick="navGo('order')">
+        <div class="nav-icon">🍱</div><div class="nav-label">Order</div>
+      </div>
+      <div class="nav-item" id="nav-rewards" onclick="navGo('rewards')">
+        <div class="nav-icon">🎁</div><div class="nav-label">Rewards</div>
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="navGo('profile')">
+        <div class="nav-icon">👤</div><div class="nav-label">Profile</div>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/app.js?v=20250506d"></script></script>
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', async () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+      const params = new URLSearchParams(window.location.search);
+      const action = params.get('action');
+      if (action) setTimeout(() => goTo(action), 300);
+
+      try {
+        const { loadMenuFromFirebase, listenMenuUpdates, saveMenuToFirebase, saveOrderToFirebase, saveReservationToFirebase, loadPicksFromFirebase, loadSectionsFromFirebase, loadCategoriesFromFirebase, loadNotifSettingsFromFirebase } = await import('./js/firebase-menu.js');
+        window._saveOrderToFirebase       = saveOrderToFirebase;
+        window._saveReservationToFirebase = saveReservationToFirebase;
+
+        // Load Today's Picks from Firebase and update UI
+        try {
+          const fbPicks = await loadPicksFromFirebase();
+          if (fbPicks && fbPicks.length > 0) {
+            localStorage.setItem('prb_picks', JSON.stringify(fbPicks));
+            if (typeof loadTodaysPicks === 'function') loadTodaysPicks();
+          }
+        } catch(e) { console.warn('Picks load failed:', e); }
+
+        // Load section config from Firebase — always fresh so Admin reorders appear immediately
+        try {
+          // Load notification settings from Firebase for use in orders
+          try {
+            const notifSettings = await loadNotifSettingsFromFirebase();
+            if (notifSettings) {
+              window._notifSettings = notifSettings;
+              localStorage.setItem('prb_notif_settings', JSON.stringify(notifSettings));
+              console.log('✅ Notif settings loaded:', notifSettings.emails);
+            }
+          } catch(e) { console.warn('Notif settings load failed:', e); }
+
+          // Load categories for dynamic tabs
+          try {
+            const fbCats = await loadCategoriesFromFirebase();
+            if (fbCats && fbCats.length > 0) {
+              window._firebaseCategories = fbCats;
+              localStorage.setItem('prb_menu_categories', JSON.stringify(fbCats));
+              if (typeof window.buildGuestMenuTabs === 'function') window.buildGuestMenuTabs(fbCats);
+            } else {
+              const cached = localStorage.getItem('prb_menu_categories');
+              if (cached && typeof window.buildGuestMenuTabs === 'function') {
+                window.buildGuestMenuTabs(JSON.parse(cached));
+              }
+            }
+          } catch(e) { console.warn('Categories load failed:', e); }
+
+          const fbSections = await loadSectionsFromFirebase();
+          if (fbSections) {
+            window._firebaseSections = fbSections;
+            localStorage.setItem('prb_menu_sections', JSON.stringify(fbSections));
+            console.log('✅ Sections loaded from Firebase');
+          } else {
+            // Fallback to localStorage
+            const cached = localStorage.getItem('prb_menu_sections');
+            if (cached) window._firebaseSections = JSON.parse(cached);
+          }
+        } catch(e) {
+          console.warn('Sections load failed, using cache:', e);
+          const cached = localStorage.getItem('prb_menu_sections');
+          if (cached) window._firebaseSections = JSON.parse(cached);
+        }
+
+        function rebuildActiveTab() {
+          const activeTab = document.querySelector('.menu-tab.active');
+          if (activeTab) {
+            const match = activeTab.getAttribute('onclick')?.match(/'(\w+)'/);
+            if (match) buildMenu(match[1]);
+          }
+        }
+
+        // Load menu from Firebase — NEVER overwrite Firebase with local data
+        // First try localStorage cache for instant display
+        const cached = localStorage.getItem('prb_menu_data');
+        if (cached) {
+          try {
+            window.firebaseMenuData = JSON.parse(cached);
+            rebuildActiveTab();
+          } catch(e) {}
+        }
+
+        // Then load fresh from Firebase and update
+        const firebaseMenu = await loadMenuFromFirebase();
+        if (firebaseMenu && Object.keys(firebaseMenu).length > 0) {
+          const fbTotal = Object.values(firebaseMenu).reduce((s,v)=>s+v.length,0);
+          const cacheTotal = cached ? Object.values(JSON.parse(cached)).reduce((s,v)=>s+v.length,0) : 0;
+          // Always use Firebase data — it's the source of truth
+          window.firebaseMenuData = firebaseMenu;
+          localStorage.setItem('prb_menu_data', JSON.stringify(firebaseMenu));
+          rebuildActiveTab();
+          console.log('✅ Menu loaded from Firebase:', fbTotal, 'items');
+        } else {
+          console.warn('⚠️ Firebase menu empty or unreachable — using localStorage cache');
+        }
+
+        listenMenuUpdates(data => {
+          window.firebaseMenuData = data;
+          rebuildActiveTab();
+        });
+
+      } catch(e) {
+        console.warn('Firebase not available, using local menu:', e);
+      }
+    });
+  </script>
+<script>
+// Fallback: ensure tip-custom-wrap is always hidden on load
+document.addEventListener('DOMContentLoaded', () => {
+  const cw = document.getElementById('tip-custom-wrap');
+  if (cw) cw.style.display = 'none';
+});
+</script>
+</body>
+</html>
+<!-- ORDER HISTORY FUNCTIONS PATCH - add to app.js -->
