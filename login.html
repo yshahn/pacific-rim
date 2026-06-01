@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pacific Rim Bistro — Sign In</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/login.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body class="auth-body">
+<div class="auth-container">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-mark">PRB</div>
+      <div class="brand-name">Pacific Rim Bistro</div>
+      <div class="brand-sub">Downtown Atlanta · Pan-Asian & Sushi</div>
+    </div>
+    <div class="auth-quote">"Every visit, a new discovery."</div>
+    <div class="auth-perks">
+      <div class="perk"><span>✦</span> Earn points with every order</div>
+      <div class="perk"><span>🗓️</span> Priority table reservations</div>
+      <div class="perk"><span>🎁</span> Exclusive member rewards</div>
+      <div class="perk"><span>🔔</span> Real-time booking alerts</div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuth('login')">Sign In</div>
+        <div class="auth-tab" onclick="switchAuth('signup')">Create Account</div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="form-login">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="••••••••"/>
+        </div>
+        <div class="auth-options">
+          <label class="remember-me"><input type="checkbox"/> Remember me</label>
+          <a href="#" class="forgot-link" onclick="doForgotPassword(event)">Forgot password?</a>
+        </div>
+        <div id="login-error" style="display:none;color:#e74c3c;font-size:12px;margin-bottom:8px;padding:8px 12px;background:#fff5f5;border-radius:8px;"></div>
+        <button class="cta-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+        <div class="auth-divider"><span>or continue with</span></div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="doLogin()">
+            <img src="https://www.google.com/favicon.ico" width="18"/> Google
+          </button>
+          <button class="social-btn" onclick="doLogin()">
+            <span>🍎</span> Apple
+          </button>
+        </div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div class="auth-form" id="form-signup">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" placeholder="John"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" placeholder="Doe"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-input" placeholder="+1 (404) 000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Min. 8 characters"/>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox"/>
+            I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" checked/>
+            Receive reservation confirmations & special offers via SMS/Email
+          </label>
+        </div>
+        <div id="signup-error" style="display:none;color:#e74c3c;font-size:12px;margin-bottom:8px;padding:8px 12px;background:#fff5f5;border-radius:8px;"></div>
+        <button class="cta-btn" id="signup-btn" onclick="doSignup()">Create Account & Earn 200 pts</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendPasswordResetEmail, onAuthStateChanged, setPersistence, browserLocalPersistence
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyChIQ0Z1sM68J6OtgIW82EyWuzys9Oz6tg',
+  authDomain: 'pacific-rim-bistro.firebaseapp.com',
+  projectId: 'pacific-rim-bistro',
+  storageBucket: 'pacific-rim-bistro.firebasestorage.app',
+  messagingSenderId: '855085279043',
+  appId: '1:855085279043:web:7e0b1db10cedf7e50b71f6',
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const USER_KEY = 'prb_user';
+
+// Persist session across browser restarts
+await setPersistence(auth, browserLocalPersistence);
+
+// If already logged in → go straight to app
+onAuthStateChanged(auth, user => {
+  if (user) {
+    const stored = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+    if (stored.email === user.email) {
+      window.location.href = 'index.html';
+    }
+  }
+});
+
+function showError(formId, msg) {
+  const el = document.getElementById(formId + '-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function hideError(formId) {
+  const el = document.getElementById(formId + '-error');
+  if (el) el.style.display = 'none';
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = loading; btn.textContent = loading ? 'Please wait...' : btn.dataset.label; }
+}
+
+window.switchAuth = function(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  const idx = tab === 'login' ? 0 : 1;
+  document.querySelectorAll('.auth-tab')[idx].classList.add('active');
+  document.getElementById('form-' + tab).classList.add('active');
+  hideError('login'); hideError('signup');
+};
+
+window.doLogin = async function() {
+  hideError('login');
+  const email    = document.querySelector('#form-login input[type="email"]').value.trim();
+  const password = document.querySelector('#form-login input[type="password"]').value;
+  if (!email || !password) { showError('login', 'Please enter email and password.'); return; }
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    // Load profile from Firebase
+    const { loadPointsFromFirebase } = await import('./js/firebase-menu.js');
+    const fbPts = await loadPointsFromFirebase(email).catch(() => null);
+    const stored = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+    const user = {
+      firstName:  stored.firstName || cred.user.displayName?.split(' ')[0] || '',
+      lastName:   stored.lastName  || cred.user.displayName?.split(' ')[1] || '',
+      email,
+      phone:      stored.phone || '',
+      points:     fbPts ? fbPts.points     : (stored.points || 0),
+      pointsLog:  fbPts ? fbPts.pointsLog  : (stored.pointsLog || []),
+      tierPoints: fbPts ? fbPts.tierPoints : (stored.tierPoints || 0),
+    };
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.location.href = 'index.html';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Sign In';
+    const msgs = {
+      'auth/user-not-found':  'No account found. Please create one.',
+      'auth/wrong-password':  'Incorrect password. Try again or reset it.',
+      'auth/invalid-email':   'Invalid email address.',
+      'auth/too-many-requests': 'Too many attempts. Please try again later.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+    };
+    showError('login', msgs[e.code] || 'Sign in failed. Please try again.');
+  }
+};
+
+window.doSignup = async function() {
+  hideError('signup');
+  const firstName = document.querySelector('#form-signup input[placeholder="John"]').value.trim();
+  const lastName  = document.querySelector('#form-signup input[placeholder="Doe"]').value.trim();
+  const email     = document.querySelector('#form-signup input[type="email"]').value.trim();
+  const phone     = document.querySelector('#form-signup input[type="tel"]').value.trim();
+  const password  = document.querySelector('#form-signup input[type="password"]').value;
+
+  if (!firstName) { showError('signup', 'Please enter your first name.'); return; }
+  if (!email)     { showError('signup', 'Please enter your email address.'); return; }
+  if (!password || password.length < 8) { showError('signup', 'Password must be at least 8 characters.'); return; }
+
+  const btn = document.getElementById('signup-btn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    const { savePointsToFirebase } = await import('./js/firebase-menu.js');
+    const pointsLog = [{ desc: 'Sign Up Bonus', pts: 200, date: Date.now() }];
+    const saved = await savePointsToFirebase(email, 200, pointsLog, 0).catch(e => {
+      console.error('Points save failed:', e); return false;
+    });
+    if (!saved) {
+      // Retry once
+      await new Promise(r => setTimeout(r, 1500));
+      await savePointsToFirebase(email, 200, pointsLog, 0).catch(e => console.error('Retry failed:', e));
+    }
+    const user = { firstName, lastName, email, phone, points: 200, pointsLog, tierPoints: 0 };
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.location.href = 'index.html';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Create Account & Earn 200 pts';
+    const msgs = {
+      'auth/email-already-in-use': 'An account with this email already exists. Sign in instead.',
+      'auth/invalid-email':        'Invalid email address.',
+      'auth/weak-password':        'Password is too weak. Use at least 8 characters.',
+    };
+    showError('signup', msgs[e.code] || 'Sign up failed. Please try again.');
+  }
+};
+
+window.doForgotPassword = async function(e) {
+  e.preventDefault();
+  const email = document.querySelector('#form-login input[type="email"]').value.trim();
+  if (!email) { showError('login', 'Enter your email address first, then click Forgot Password.'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showError('login', '');
+    const el = document.getElementById('login-error');
+    if (el) {
+      el.style.color = '#27ae60';
+      el.style.background = '#f0fff4';
+      el.textContent = '✅ Password reset email sent! Check your inbox.';
+      el.style.display = 'block';
+    }
+  } catch(e) {
+    showError('login', 'Could not send reset email. Check your email address.');
+  }
+};
+
+// Store label for loading state
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cta-btn').forEach(btn => btn.dataset.label = btn.textContent);
+});
+</script>
+</body>
+</html>
