@@ -23,8 +23,8 @@
 <p class="sub">One-time tool to restore the original category tabs and section config, which were accidentally overwritten while building Hsu's Gourmet.</p>
 
 <div class="safe-box">
-  ✅ This tool ONLY writes to <code>config/categories</code> and <code>config/sections</code>.<br>
-  It does <strong>not</strong> touch <code>config/menu</code> — your 231 menu items are untouched and safe.
+  ✅ This restores <code>config/categories</code> and <code>config/sections</code>, and re-tags the <code>subcat</code> field on existing menu items so the admin accordion groups work again.<br>
+  Item names, prices, descriptions, images, and options are <strong>never modified</strong> — only the internal <code>subcat</code> grouping tag is added back where it belonged.
 </div>
 
 <div class="warn-box">
@@ -37,7 +37,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── Pacific Rim Bistro's ORIGINAL Firebase project (unchanged) ──
 const firebaseConfig = {
@@ -53,24 +53,64 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
 // ── ORIGINAL Pacific Rim categories — restored exactly from index.html tab markup ──
-// NOTE: key must be "name" (not "label") — buildGuestMenuTabs() in app.js reads cat.name
+// NOTE: includes BOTH "name" (guest app's buildGuestMenuTabs reads cat.name)
+//       AND "label" (admin.html's CAT_LABELS-style usage) for compatibility.
 const categories = [
-  { key:'lunch',      emoji:'🌞', name:'Lunch' },
-  { key:'appetizers', emoji:'🥢', name:'Appetizers' },
-  { key:'soups',      emoji:'🥗', name:'Soups & Salads' },
-  { key:'entrees',    emoji:'🍛', name:'Kitchen Entrees' },
-  { key:'rolls',      emoji:'🍣', name:'Sushi Rolls' },
-  { key:'nigiri',     emoji:'🍙', name:'Nigiri & Sashimi' },
-  { key:'drinks',     emoji:'🥤', name:'Drinks' },
-  { key:'sides',      emoji:'🧂', name:'Sides' },
+  { key:'lunch',      emoji:'🌞', name:'Lunch',              label:'Lunch' },
+  { key:'appetizers', emoji:'🥢', name:'Appetizers',         label:'Appetizers' },
+  { key:'soups',      emoji:'🥗', name:'Soups & Salads',     label:'Soups & Salads' },
+  { key:'entrees',    emoji:'🍛', name:'Kitchen Entrees',    label:'Kitchen Entrees' },
+  { key:'rolls',      emoji:'🍣', name:'Sushi Rolls',        label:'Sushi Rolls' },
+  { key:'nigiri',     emoji:'🍙', name:'Nigiri & Sashimi',   label:'Nigiri & Sashimi' },
+  { key:'drinks',     emoji:'🥤', name:'Drinks',             label:'Drinks' },
+  { key:'sides',      emoji:'🧂', name:'Sides',              label:'Sides' },
 ];
 
-// ── Sections config ──
-// Pacific Rim's menu items in the backup do not use a `subcat` accordion grouping
-// the way Hsu's lunch tab does — each category tab shows its full flat item list.
-// We restore an empty/default sections map so no leftover Hsu's section config
-// (apps/soups/noodles/entrees/combo/beverages) bleeds into Pacific Rim's display.
-const sections = {};
+// ── ORIGINAL Pacific Rim sections — restored exactly from admin.html DEFAULT_SECTIONS ──
+const sections = {
+  lunch: [
+    { key:'bento',    emoji:'🍱', label:'Bento Box Specials',  sub:'Served with Miso Soup, House Salad, Spring Roll & Steamed Rice', collapsed:false },
+    { key:'specials', emoji:'🍱', label:'Lunch Specials',       sub:'', collapsed:false },
+    { key:'apps',     emoji:'🥢', label:'Lunch Appetizers',     sub:'', collapsed:false },
+    { key:'soups',    emoji:'🥗', label:'Soups & Salads',       sub:'', collapsed:false },
+    { key:'entrees',  emoji:'🍛', label:'Kitchen Entrees',      sub:'', collapsed:false },
+    { key:'classic',  emoji:'🍣', label:'House Classic Roll',   sub:'', collapsed:false },
+    { key:'special',  emoji:'🍣', label:'House Special Roll',   sub:'', collapsed:false },
+    { key:'chef',     emoji:'🍣', label:'Chef Special Roll',    sub:'', collapsed:false },
+  ],
+  rolls: [
+    { key:'classic', emoji:'🍣', label:'House Classic Roll',   sub:'', collapsed:false },
+    { key:'special', emoji:'🍣', label:'House Special Roll',   sub:'', collapsed:false },
+    { key:'chef',    emoji:'🍣', label:'Chef Special Roll',    sub:'', collapsed:false },
+  ],
+  nigiri: [
+    { key:'sashimi', emoji:'🍙', label:'Sashimi',              sub:'', collapsed:false },
+  ],
+};
+
+// ── ORIGINAL Pacific Rim subcat assignment map — restored from admin.html DEFAULT_SUBCAT_MAP ──
+// This tells us which menu items belong to which section key, so we can re-tag
+// each item's `subcat` field in config/menu to match (without altering names/prices/etc).
+const DEFAULT_SUBCAT_MAP = {
+  lunch: {
+    bento:    ['Sweet and Sour Fish','Black Pepper Beef','Fresh Ginger Chicken','Garlic Shrimp','Mongolian Beef','Thai Yellow Curry (Bento)','Green Avocado Curry (Bento)','Panang Curry (Bento)','Spicy Thai Basil (Bento)','Spicy Seven Flavored Beef (Bento)','Wanchi Shrimp (Bento)','Grilled Teriyaki Chicken (Bento)','Grilled Bangkok Chicken (Bento)'],
+    specials: ['Special Roll Combination','Sushi Roll Combination - Pick 2','Sushi Roll Combination - Pick 3'],
+    apps:     ['Lunch Edamame','Lunch Spicy Edamame','Lunch Fried Pork Gyoza','Lunch Vietnamese Spring Roll','Lunch Spicy Calamari','Lunch Chicken Satay','Lunch Side Fried Rice','Lunch Tempura Combo','Lunch Ika Sansai','Lunch Tuna Tataki','Lunch Yellowtail Carpaccio','Lunch Ahi Poke','Lunch Cu Kani'],
+    soups:    ['Lunch Miso Soup','Lunch Ginger Salad','Lunch Seaweed Salad','Lunch Cucumber Kani'],
+    entrees:  ['Spicy Basil — Tofu','Pad Thai — Shrimp','Panang Curry — Chicken','Yellow Curry — Chicken'],
+    classic:  ['Lunch California Roll','Lunch Spicy Crab Roll','Lunch Spicy Tuna Roll','Lunch Philadelphia Roll','Lunch Eel Roll','Lunch Shrimp Tempura Roll'],
+    special:  ['Lunch Firecracker Roll','Lunch I Love Tuna Roll','Lunch I Love Salmon Roll','Lunch Spider Roll','Lunch Dragon Roll'],
+    chef:     ['Lunch Playboy on Fire Roll','Lunch Incredible Hulk Roll','Lunch Sumo Roll'],
+  },
+  rolls: {
+    classic: ['California Roll','Spicy Crab Roll','Spicy Tuna Roll','Philadelphia Roll','Eel Roll','Shrimp Tempura Roll','Alaska Roll','TNT Roll','Crunch Shrimp Roll','Vegetable Roll','Salmon Avocado Roll','Tuna Avocado Roll','Tuna Roll','Salmon Roll','Avocado Roll','Cucumber Roll','Negihama Roll'],
+    special: ['Firecracker Roll','I Love Tuna Roll','I Love Salmon Roll','Spider Roll','Lobster Tempura Roll','Volcano Roll','Dragon Roll','Rainbow Roll','Caterpillar Roll','Red Dragon Roll','Green Roll','Atlanta Roll','Phoenix Roll','Yum Yum Roll','Hamachi Twist Roll','Kiss of Fire Roll','California Dream Roll','Black Pink Roll','Oishi Roll','Sex in the City Roll','French Kiss Roll'],
+    chef:    ['Playboy on Fire Roll','Incredible Hulk Roll','Sumo Roll','King Kamehameha Roll','Snow White Roll','Crunch Chef Roll','Big Mama Roll'],
+  },
+  nigiri: {
+    sashimi: ['Salmon Sashimi (3pcs)','Tuna Sashimi (3pcs)','Yellowtail Sashimi (3pcs)'],
+  },
+};
 
 const logEl = document.getElementById('log');
 function log(msg, cls) {
@@ -93,18 +133,51 @@ window.runRestore = async function() {
       data: JSON.stringify(categories),
       updatedAt: Date.now(),
     });
-    log(`✅ Categories restored — ${categories.length} tabs: ${categories.map(c=>c.label).join(', ')}`, 'ok');
+    log(`✅ Categories restored — ${categories.length} tabs: ${categories.map(c=>c.name).join(', ')}`, 'ok');
 
-    // 2. Restore sections (cleared of Hsu's leftover config)
+    // 2. Restore sections
     await setDoc(doc(db, 'config', 'sections'), {
       data: JSON.stringify(sections),
       updatedAt: Date.now(),
     });
-    log('✅ Sections cleared of Hsu\'s leftover config', 'ok');
+    log(`✅ Sections restored — accordion groups for: ${Object.keys(sections).join(', ')}`, 'ok');
+
+    // 3. Re-tag subcat on existing menu items (without touching anything else)
+    log('');
+    log('🔎 Reading existing config/menu to re-tag subcat fields...');
+    const menuSnap = await getDoc(doc(db, 'config', 'menu'));
+    if (!menuSnap.exists()) {
+      log('⚠️ config/menu not found — skipping subcat re-tag (categories/sections still restored above).', 'err');
+    } else {
+      const menuData = JSON.parse(menuSnap.data().data);
+      let taggedCount = 0;
+
+      for (const [catKey, subcatMap] of Object.entries(DEFAULT_SUBCAT_MAP)) {
+        if (!menuData[catKey]) continue;
+        // Build reverse lookup: item name -> subcat key
+        const nameToSubcat = {};
+        for (const [subcatKey, names] of Object.entries(subcatMap)) {
+          names.forEach(n => { nameToSubcat[n] = subcatKey; });
+        }
+        menuData[catKey] = menuData[catKey].map(item => {
+          const subcat = nameToSubcat[item.n];
+          if (subcat) { taggedCount++; return { ...item, subcat }; }
+          return item; // leave untouched if not in the map (e.g. drinks/sides/appetizers/soups/entrees have no subcat grouping)
+        });
+      }
+
+      const totalItems = Object.values(menuData).reduce((s, v) => s + v.length, 0);
+      await setDoc(doc(db, 'config', 'menu'), {
+        data: JSON.stringify(menuData),
+        version: 'restored-subcat',
+        updatedAt: Date.now(),
+        itemCount: totalItems,
+      });
+      log(`✅ Re-tagged ${taggedCount} items with their original subcat — total menu still ${totalItems} items (untouched otherwise)`, 'ok');
+    }
 
     log('');
-    log('🎉 Done! Pacific Rim categories restored.', 'ok');
-    log('👉 config/menu was NOT touched — your 231 items are exactly as they were.');
+    log('🎉 Done! Pacific Rim categories, sections, and subcats restored.', 'ok');
     log('👉 Refresh the Pacific Rim guest app and Admin → Menu Manager to confirm.');
     btn.textContent = '✅ Restore Complete';
   } catch (e) {
