@@ -1777,7 +1777,9 @@ async function confirmReservation() {
   const profileFullName = [profile?.firstName, profile?.lastName].filter(s => s && s !== 'undefined').join(' ').trim();
   const resNameInput = document.getElementById('res-name')?.value.trim() || '';
   const resName = resNameInput || userFullName || profileFullName || '';
-  if (!resName) { alert('Please enter your name'); return; }
+  if (!resName) { alert('Please enter your name.'); return; }
+  if (!resPhone || resPhone.replace(/\D/g,'').length < 10) { alert('Please enter a valid phone number.'); return; }
+  if (!resEmail || !resEmail.includes('@')) { alert('Please enter a valid email address.'); return; }
   const resPhone = document.getElementById('res-phone')?.value.trim() || user?.phone || (profile.phone !== 'undefined' ? profile.phone : '') || '';
   const resEmail = document.getElementById('res-email')?.value.trim() || user?.email || (profile.email !== 'undefined' ? profile.email : '') || '';
   const reservation = {
