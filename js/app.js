@@ -1487,7 +1487,7 @@ function addToCart(name, price, emoji, btn) {
 function prefillReservationForm() {
   const user    = getUser();
   const profile = loadProfile();
-  const name    = (user ? (user.firstName + ' ' + user.lastName).trim() : '') || (profile.firstName + ' ' + profile.lastName).trim();
+  const name = (user ? [user.firstName, user.lastName].filter(s => s && s !== 'undefined').join(' ').trim() : '') || [profile.firstName, profile.lastName].filter(s => s && s !== 'undefined').join(' ').trim();
   const phone   = user?.phone || profile.phone || '';
   const email   = user?.email || profile.email || '';
   const nameEl  = document.getElementById('res-name');
@@ -1780,8 +1780,10 @@ async function confirmReservation() {
   if (!resName) { alert('Please enter your name.'); return; }
   if (!resPhone || resPhone.replace(/\D/g,'').length < 10) { alert('Please enter a valid phone number.'); return; }
   if (!resEmail || !resEmail.includes('@')) { alert('Please enter a valid email address.'); return; }
-  const resPhone = document.getElementById('res-phone')?.value.trim() || user?.phone || (profile.phone !== 'undefined' ? profile.phone : '') || '';
-  const resEmail = document.getElementById('res-email')?.value.trim() || user?.email || (profile.email !== 'undefined' ? profile.email : '') || '';
+  const resPhone = document.getElementById('res-phone')?.value.trim() || '';
+  const resEmail = document.getElementById('res-email')?.value.trim() || '';
+  if (!resPhone || resPhone.replace(/\D/g,'').length < 10) { alert('Please enter a valid phone number.'); return; }
+  if (!resEmail || !resEmail.includes('@')) { alert('Please enter a valid email address.'); return; }
   const reservation = {
     id: Date.now().toString(),
     date: dateEl ? dateEl.dataset.date || dateEl.textContent.trim() : new Date().toLocaleDateString(),
