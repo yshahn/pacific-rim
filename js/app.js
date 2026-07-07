@@ -682,7 +682,17 @@ function buildCartScreen() {
   }
   if (btnEl) btnEl.style.display = 'block';
 
-  const groups = groupCartItems();
+  // 같은 이름 아이템 그룹핑 (수량 합산)
+  const rawGroups = groupCartItems();
+  const groupMap = new Map();
+  rawGroups.forEach(item => {
+    if (groupMap.has(item.name)) {
+      groupMap.get(item.name).qty++;
+    } else {
+      groupMap.set(item.name, { ...item, qty: 1 });
+    }
+  });
+  const groups = [...groupMap.values()];
   listEl.innerHTML = '';
 
   groups.forEach((item, gi) => {
@@ -696,7 +706,7 @@ function buildCartScreen() {
 
     const itemTotal = parseFloat(item.price) + item.toppings.reduce((s,t) => s + parseFloat(t.price), 0);
     // Count how many of this exact group (same name + same toppings) exist, for the qty control
-    const qty = cart.filter(c => c.name === item.name).length;
+    const qty = item.qty;
 
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:14px 0;border-bottom:1px solid var(--border);';
