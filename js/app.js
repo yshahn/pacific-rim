@@ -1759,7 +1759,7 @@ async function buildDates() {
       '<div class="dc-day">' + d.toLocaleDateString('en-US',{weekday:'short'}) + '</div>' +
       '<div class="dc-num">' + d.getDate() + '</div>' +
       '<div class="dc-mon">' + d.toLocaleDateString('en-US',{month:'short'}) + '</div>' +
-      (isBlocked ? '<div style="font-size:9px;color:#e74c3c;margin-top:2px;">Closed</div>' : '');
+      (isBlocked ? '<div style="font-size:9px;color:#e74c3c;margin-top:2px;">Unavailable</div>' : '');
     if (!isBlocked) {
       if (firstAvailable) firstAvailable = false;
       cell.addEventListener('click', function() {
