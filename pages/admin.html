@@ -2770,7 +2770,7 @@ async function loadBlackoutTab() {
   if (!list) return;
   list.innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading...</div>';
   try {
-    const { db } = await import('./js/firebase-menu.js');
+    const { db } = await import('../js/firebase-menu.js');
     const { collection, getDocs, orderBy, query } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const snap = await getDocs(query(collection(db, 'blackout_dates'), orderBy('createdAt', 'desc')));
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -2814,7 +2814,7 @@ async function saveBlackout() {
     data.dow = parseInt(document.getElementById('blackout-dow').value);
   }
   try {
-    const { db } = await import('./js/firebase-menu.js');
+    const { db } = await import('../js/firebase-menu.js');
     const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     await addDoc(collection(db, 'blackout_dates'), data);
     showToast('✅ Blackout saved!');
@@ -2825,7 +2825,7 @@ async function saveBlackout() {
 async function deleteBlackout(id) {
   if (!confirm('Delete this blackout?')) return;
   try {
-    const { db } = await import('./js/firebase-menu.js');
+    const { db } = await import('../js/firebase-menu.js');
     const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     await deleteDoc(doc(db, 'blackout_dates', id));
     showToast('🗑️ Blackout deleted');
