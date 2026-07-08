@@ -153,7 +153,7 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">OVERVIEW</div>
     <div class="sidebar-item active" onclick="showTab('dashboard', this)">📊 Dashboard</div>
-    <div class="sidebar-item" onclick="showTab('reservations', this)">🗓️ Reservations</div>
+    <div class="sidebar-item" onclick="showTab('reservations', this)">🗓️ Reservations</div> <div class="sidebar-item" onclick="showTab('blackout', this)">🚫 Blackout Dates</div>
     <div class="sidebar-item" onclick="showTab('orders', this)">🍱 Orders</div>
     <div class="nav-section-label">GUESTS</div>
     <div class="sidebar-item" onclick="showTab('members', this)">👤 Members</div>
@@ -281,6 +281,68 @@
     </div>
   </div>
 
+  <!-- ══ BLACKOUT DATES ══ -->
+<div class="tab-content" id="tab-blackout">
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">🚫 Blackout Dates & Times</div>
+      <button class="cta-btn-sm" onclick="openBlackoutModal()">+ Add Blackout</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Block specific dates or times from reservation availability.</p>
+    <div id="blackout-list" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="color:var(--muted);font-size:13px;">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BLACKOUT MODAL ══ -->
+<div id="blackout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;">Add Blackout</div>
+      <button onclick="closeBlackoutModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-input" id="blackout-type" onchange="toggleBlackoutType()">
+        <option value="date">Specific Date (Full Day)</option>
+        <option value="recurring">Recurring (Day of Week)</option>
+      </select>
+    </div>
+    <div id="blackout-date-field" class="form-group">
+      <label class="form-label">Date</label>
+      <input type="date" class="form-input" id="blackout-date"/>
+    </div>
+    <div id="blackout-recurring-field" class="form-group" style="display:none;">
+      <label class="form-label">Day of Week</label>
+      <select class="form-input" id="blackout-dow">
+        <option value="0">Sunday</option>
+        <option value="1">Monday</option>
+        <option value="2">Tuesday</option>
+        <option value="3">Wednesday</option>
+        <option value="4">Thursday</option>
+        <option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Time Range <span style="color:var(--muted);font-weight:400;">(optional — leave empty to block full day)</span></label>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input type="time" class="form-input" id="blackout-start" style="flex:1;"/>
+        <span style="color:var(--muted);">→</span>
+        <input type="time" class="form-input" id="blackout-end" style="flex:1;"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reason <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+      <input type="text" class="form-input" id="blackout-reason" placeholder="e.g. Holiday, Private Event"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="cta-btn" style="margin:0;flex:1;" onclick="saveBlackout()">Save</button>
+      <button onclick="closeBlackoutModal()" style="padding:14px 20px;border:1px solid var(--border);border-radius:12px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+    </div>
+  </div>
+</div>
   <!-- ══ RESERVATIONS ══ -->
   <div class="tab-content" id="tab-reservations">
     <div class="admin-card">
@@ -1152,7 +1214,8 @@ function showTab(name, el) {
   if (name === 'notif-settings') loadNotifSettings();
   if (name === 'members') loadMembers();
   if (name === 'categories') loadCategoryManager();
-  if (name === 'backups') loadBackupsTab();
+  if(name==='backups')loadBackupsTab();
+  if(name==='blackout')loadBlackoutTab();
 }
 
 // ── TODAY'S PICKS
@@ -2695,9 +2758,80 @@ function saveMenuToStorage(){
     // Now load from localStorage into allMenuItems (no Firebase call inside)
     loadBaseMenu();
 
-  } catch(e) {
+} catch(e) {
     console.warn('Firebase not available:', e);
   }
+</script>
+
+<script>
+// ── BLACKOUT DATES
+async function loadBlackoutTab() {
+  const list = document.getElementById('blackout-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading...</div>';
+  try {
+    const { db } = await import('./js/firebase-menu.js');
+    const { collection, getDocs, orderBy, query } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await getDocs(query(collection(db, 'blackout_dates'), orderBy('createdAt', 'desc')));
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!docs.length) { list.innerHTML = '<div style="color:var(--muted);font-size:13px;">No blackout dates set.</div>'; return; }
+    list.innerHTML = '';
+    docs.forEach(doc => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:12px;';
+      const label = doc.type === 'recurring'
+        ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][doc.dow] + ' (Weekly)'
+        : doc.date;
+      const timeLabel = doc.startTime ? ` · ${doc.startTime} – ${doc.endTime}` : ' · All Day';
+      row.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">🚫 ${label}${timeLabel}</div>
+          ${doc.reason ? `<div style="font-size:12px;color:var(--muted);">${doc.reason}</div>` : ''}
+        </div>
+        <button onclick="deleteBlackout('${doc.id}')" style="padding:7px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">🗑</button>`;
+      list.appendChild(row);
+    });
+  } catch(e) { list.innerHTML = '<div style="color:#c0392b;font-size:13px;">Failed to load.</div>'; }
+}
+function openBlackoutModal() { document.getElementById('blackout-modal').style.display = 'flex'; }
+function closeBlackoutModal() { document.getElementById('blackout-modal').style.display = 'none'; }
+function toggleBlackoutType() {
+  const type = document.getElementById('blackout-type').value;
+  document.getElementById('blackout-date-field').style.display = type === 'date' ? 'block' : 'none';
+  document.getElementById('blackout-recurring-field').style.display = type === 'recurring' ? 'block' : 'none';
+}
+async function saveBlackout() {
+  const type = document.getElementById('blackout-type').value;
+  const startTime = document.getElementById('blackout-start').value;
+  const endTime = document.getElementById('blackout-end').value;
+  const reason = document.getElementById('blackout-reason').value.trim();
+  const data = { type, startTime, endTime, reason, createdAt: Date.now() };
+  if (type === 'date') {
+    const date = document.getElementById('blackout-date').value;
+    if (!date) { showToast('⚠️ Please select a date', 'error'); return; }
+    data.date = date;
+  } else {
+    data.dow = parseInt(document.getElementById('blackout-dow').value);
+  }
+  try {
+    const { db } = await import('./js/firebase-menu.js');
+    const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await addDoc(collection(db, 'blackout_dates'), data);
+    showToast('✅ Blackout saved!');
+    closeBlackoutModal();
+    loadBlackoutTab();
+  } catch(e) { showToast('🔴 Failed to save', 'error'); }
+}
+async function deleteBlackout(id) {
+  if (!confirm('Delete this blackout?')) return;
+  try {
+    const { db } = await import('./js/firebase-menu.js');
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await deleteDoc(doc(db, 'blackout_dates', id));
+    showToast('🗑️ Blackout deleted');
+    loadBlackoutTab();
+  } catch(e) { showToast('🔴 Failed to delete', 'error'); }
+}
 </script>
 </body>
 </html>
