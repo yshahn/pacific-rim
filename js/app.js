@@ -1702,7 +1702,7 @@ let _blackoutDates = null;
 async function loadBlackoutDates() {
   if (_blackoutDates && _blackoutDates.length > 0) return _blackoutDates;
   try {
-    const { db } = await import('./js/firebase-menu.js');
+    const { db } = await import('/js/firebase-menu.js');
     const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const snap = await getDocs(collection(db, 'blackout_dates'));
     console.log('🔥 blackout snap size:', snap.size);
