@@ -1697,28 +1697,129 @@ function buildPickupSlots() {
 // ─────────────────────────────────
 // RESERVATION
 // ─────────────────────────────────
-function buildDates() {
+let _blackoutDates = null;
+
+async function loadBlackoutDates() {
+  if (_blackoutDates) return _blackoutDates;
+  try {
+    const { db } = await import('./js/firebase-menu.js');
+    const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await getDocs(collection(db, 'blackout_dates'));
+    _blackoutDates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { _blackoutDates = []; }
+  return _blackoutDates;
+}
+
+function isDateBlackedOut(date, blackouts) {
+  const dow = date.getDay();
+  const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  return blackouts.some(b => {
+    if (b.type === 'date' && b.date === dateStr && !b.startTime) return true;
+    if (b.type === 'recurring' && parseInt(b.dow) === dow && !b.startTime) return true;
+    return false;
+  });
+}
+
+function isTimeBlackedOut(date, slot, blackouts) {
+  const dow = date.getDay();
+  const dateStr = date.toLocaleDateString('en-CA');
+  const slotMins = slot.h * 60 + slot.m;
+  return blackouts.some(b => {
+    if (!b.startTime) return false;
+    const startMins = parseInt(b.startTime.split(':')[0]) * 60 + parseInt(b.startTime.split(':')[1]);
+    const endMins = parseInt(b.endTime.split(':')[0]) * 60 + parseInt(b.endTime.split(':')[1]);
+    if (slotMins < startMins || slotMins >= endMins) return false;
+    if (b.type === 'date' && b.date === dateStr) return true;
+    if (b.type === 'recurring' && parseInt(b.dow) === dow) return true;
+    return false;
+  });
+}
+
+async function buildDates() {
   const grid = document.getElementById('date-grid');
   if (!grid) return;
   grid.innerHTML = '';
+  const blackouts = await loadBlackoutDates();
   const today = new Date();
+  let firstAvailable = true;
   for (let i = 0; i < 30; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
+    const isBlocked = isDateBlackedOut(d, blackouts);
     const cell = document.createElement('div');
-    cell.className = 'date-cell' + (i === 0 ? ' selected' : '');
+    cell.className = 'date-cell' + (!isBlocked && firstAvailable ? ' selected' : '');
+    if (isBlocked) cell.className += ' blacked-out';
     cell.dataset.date = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     cell.innerHTML =
       '<div class="dc-day">' + d.toLocaleDateString('en-US',{weekday:'short'}) + '</div>' +
       '<div class="dc-num">' + d.getDate() + '</div>' +
-      '<div class="dc-mon">' + d.toLocaleDateString('en-US',{month:'short'}) + '</div>';
-    cell.addEventListener('click', function() {
-      document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-    });
+      '<div class="dc-mon">' + d.toLocaleDateString('en-US',{month:'short'}) + '</div>' +
+      (isBlocked ? '<div style="font-size:9px;color:#e74c3c;margin-top:2px;">Closed</div>' : '');
+    if (!isBlocked) {
+      if (firstAvailable) firstAvailable = false;
+      cell.addEventListener('click', function() {
+        document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        buildTimeSlots();
+      });
+    } else {
+      cell.style.cssText += 'opacity:0.4;cursor:not-allowed;';
+    }
     grid.appendChild(cell);
   }
   buildTimeSlots();
+}
+
+async function buildTimeSlots() {
+  const grid = document.getElementById('time-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const blackouts = await loadBlackoutDates();
+  const selectedDateEl = document.querySelector('.date-cell.selected');
+  const selectedDate = selectedDateEl ? new Date(selectedDateEl.dataset.date) : new Date();
+  const slots = [];
+  for (let h = 11; h <= 13; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 11 && m < 30) continue;
+      if (h === 13 && m > 30) continue;
+      slots.push({ h, m, period: 'Lunch' });
+    }
+  }
+  for (let h = 17; h <= 20; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 20 && m > 30) continue;
+      slots.push({ h, m, period: 'Dinner' });
+    }
+  }
+  let lastPeriod = '';
+  let firstChip = true;
+  slots.forEach(slot => {
+    if (slot.period !== lastPeriod) {
+      const header = document.createElement('div');
+      header.style.cssText = 'width:100%;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;padding:8px 0 4px;flex-basis:100%;';
+      header.textContent = slot.period;
+      grid.appendChild(header);
+      lastPeriod = slot.period;
+    }
+    const isBlocked = isTimeBlackedOut(selectedDate, slot, blackouts);
+    const d = new Date();
+    d.setHours(slot.h, slot.m);
+    const label = d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+    const chip = document.createElement('div');
+    chip.className = 'time-chip' + (!isBlocked && firstChip ? ' selected' : '');
+    if (isBlocked) chip.className += ' blacked-out';
+    chip.textContent = label + (isBlocked ? ' 🚫' : '');
+    if (!isBlocked) {
+      if (firstChip) firstChip = false;
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    } else {
+      chip.style.cssText = 'opacity:0.4;cursor:not-allowed;text-decoration:line-through;';
+    }
+    grid.appendChild(chip);
+  });
 }
 
 function buildTimeSlots() {
