@@ -3,26 +3,6 @@ const IMG = 'https://static.spotapps.co/spots/';
 const menuData = {
   lunch: [
 // ── BENTO SPECIALS
-  const dow = date.getDay();
-  const dateStr = date.toLocaleDateString('en-CA');
-  const slotMins = slot.h * 60 + slot.m;
-  return blackouts.some(b => {
-    if (!b.startTime || b.startTime === '') return false;
-    const startParts = b.startTime.split(':');
-    const endParts = b.endTime.split(':');
-    if (startParts.length < 2 || endParts.length < 2) return false;
-    const startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-    const endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-    if (slotMins < startMins || slotMins >= endMins) return false;
-    if (b.type === 'date') {
-      // Firebase date format: YYYY-MM-DD, compare with en-CA
-      const bDate = b.date || '';
-      return bDate === dateStr;
-    }
-    if (b.type === 'recurring' && parseInt(b.dow) === dow) return true;
-    return false;
-  });
-}
     { e:'🍱', n:'Sweet and Sour Fish', d:'Stir fried crispy tilapia with red bell pepper, yellow onion, and grape tomatoes with sweet & sour sauce · Served with Miso Soup, House Salad, Spring Roll and Steamed Rice', p:18, img:null,},
     { e:'🥩', n:'Black Pepper Beef', d:'Stir fried beef with black, red and green bell pepper, onion and touch of home made brown sauce · Served with Miso Soup, House Salad, Spring Roll and Steamed Rice', p:18, img:null,},
     { e:'🌿', n:'Fresh Ginger Chicken', d:'Stir fried chicken, red onion, carrot, mushroom over ginger sauce · Served with Miso Soup, House Salad, Spring Roll and Steamed Rice', p:17, img:null,},
