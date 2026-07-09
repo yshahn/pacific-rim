@@ -1770,9 +1770,10 @@ async function buildDates() {
       (isBlocked ? '<div style="font-size:9px;color:#e74c3c;margin-top:2px;">Unavailable</div>' : '');
     if (!isBlocked) {
       if (firstAvailable) firstAvailable = false;
-      cell.addEventListener('click', function() {
+cell.addEventListener('click', function() {
         document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
+        console.log('📅 date clicked:', this.dataset.date);
         buildTimeSlots();
       });
     } else {
