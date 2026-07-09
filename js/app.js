@@ -1792,14 +1792,14 @@ const rawDate = selectedDateEl ? new Date(selectedDateEl.dataset.date) : new Dat
 const selectedDate = new Date(rawDate.getFullYear(), rawDate.getMonth(), rawDate.getDate());
   const slots = [];
   for (let h = 11; h <= 13; h++) {
-    for (let m = 0; m < 60; m += 15) {
+for (let m = 0; m < 60; m += 30) {
       if (h === 11 && m < 30) continue;
       if (h === 13 && m > 30) continue;
       slots.push({ h, m, period: 'Lunch' });
     }
   }
   for (let h = 17; h <= 20; h++) {
-    for (let m = 0; m < 60; m += 15) {
+    for (let m = 0; m < 60; m += 30) {
       if (h === 20 && m > 30) continue;
       slots.push({ h, m, period: 'Dinner' });
     }
