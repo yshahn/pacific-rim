@@ -1734,8 +1734,9 @@ function isTimeBlackedOut(date, slot, blackouts) {
     const startParts = b.startTime.split(':');
     const endParts = b.endTime.split(':');
     if (startParts.length < 2 || endParts.length < 2) return false;
-    const startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-    const endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+const startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+    let endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+    if (endMins === 0) endMins = 24 * 60; // 자정(00:00)은 다음날 0시 = 24:00으로 처리
     if (slotMins < startMins || slotMins >= endMins) return false;
     if (b.type === 'date') {
       // Firebase date format: YYYY-MM-DD, compare with en-CA
