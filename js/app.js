@@ -2,8 +2,7 @@
 const IMG = 'https://static.spotapps.co/spots/';
 const menuData = {
   lunch: [
-    // ── BENTO // ── BENTO SPECIALS
-function isTimeBlackedOut(date, slot, blackouts) {SPECIALSfunction isTimeBlackedOut(date, slot, blackouts) {
+// ── BENTO SPECIALS
   const dow = date.getDay();
   const dateStr = date.toLocaleDateString('en-CA');
   const slotMins = slot.h * 60 + slot.m;
