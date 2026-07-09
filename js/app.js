@@ -1787,8 +1787,9 @@ async function buildTimeSlots() {
   if (!grid) return;
   grid.innerHTML = '';
   const blackouts = await loadBlackoutDates();
-  const selectedDateEl = document.querySelector('.date-cell.selected');
-  const selectedDate = selectedDateEl ? new Date(selectedDateEl.dataset.date) : new Date();
+ const selectedDateEl = document.querySelector('.date-cell.selected');
+const rawDate = selectedDateEl ? new Date(selectedDateEl.dataset.date) : new Date();
+const selectedDate = new Date(rawDate.getFullYear(), rawDate.getMonth(), rawDate.getDate());
   const slots = [];
   for (let h = 11; h <= 13; h++) {
     for (let m = 0; m < 60; m += 15) {
