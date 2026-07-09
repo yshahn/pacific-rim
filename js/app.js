@@ -1838,50 +1838,7 @@ for (let m = 0; m < 60; m += 30) {
   });
 }
 
-function buildTimeSlots() {
-  const grid = document.getElementById('time-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  const slots = [];
-  // Lunch: 11:30 AM – 1:30 PM
-  for (let h = 11; h <= 13; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === 11 && m < 30) continue;
-      if (h === 13 && m > 30) continue;
-      slots.push({ h, m, period: 'Lunch' });
-    }
-  }
-  // Dinner: 5:00 PM – 8:30 PM
-  for (let h = 17; h <= 20; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === 20 && m > 30) continue;
-      slots.push({ h, m, period: 'Dinner' });
-    }
-  }
-  let lastPeriod = '';
-  let firstChip = true;
-  slots.forEach(slot => {
-    if (slot.period !== lastPeriod) {
-      const header = document.createElement('div');
-      header.style.cssText = 'width:100%;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;padding:8px 0 4px;flex-basis:100%;';
-      header.textContent = slot.period;
-      grid.appendChild(header);
-      lastPeriod = slot.period;
-    }
-    const d = new Date();
-    d.setHours(slot.h, slot.m);
-    const label = d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
-    const chip = document.createElement('div');
-    chip.className = 'time-chip' + (firstChip ? ' selected' : '');
-    chip.textContent = label;
-    chip.addEventListener('click', function() {
-      document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-    });
-    grid.appendChild(chip);
-    firstChip = false;
-  });
-}
+
 
 async function confirmReservation() {
   const user    = getUser();
