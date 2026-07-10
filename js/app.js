@@ -2517,10 +2517,28 @@ btn.addEventListener('click', function() {
             this.classList.add('selected');
           }
         } else {
-          // Multi select — allow duplicates, just add
-          if (sel.length >= group.max) return;
-          _msSelections[gi] = [...sel, choice];
-          this.classList.add('selected');
+          // Multi select — allow duplicates with counter
+          const count = sel.filter(s => s === choice).length;
+          if (sel.length >= group.max) {
+            // Already at max — remove one of this choice if exists
+            if (count > 0) {
+              const idx = sel.indexOf(choice);
+              _msSelections[gi] = [...sel.slice(0, idx), ...sel.slice(idx + 1)];
+              const newCount = _msSelections[gi].filter(s => s === choice).length;
+              if (newCount === 0) {
+                this.classList.remove('selected');
+                this.textContent = choice;
+              } else {
+                this.textContent = choice + ' ×' + newCount;
+              }
+            }
+          } else {
+            // Add selection
+            _msSelections[gi] = [...sel, choice];
+            const newCount = count + 1;
+            this.classList.add('selected');
+            this.textContent = newCount > 1 ? choice + ' ×' + newCount : choice;
+          }
         }
         updateMsAddBtn();
       });
