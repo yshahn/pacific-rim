@@ -2514,7 +2514,9 @@ function openMultiSelectModal(item) {
             if (group.max === 1) {
               body.querySelectorAll('.ms-choice-btn[data-group="' + gi + '"].selected').forEach(b => b.classList.remove('selected'));
               _msSelections[gi] = [];
-            } else { return; }
+            } else { 
+              // Allow duplicate selections - just add again
+            }
           }
           this.classList.add('selected');
           _msSelections[gi] = [..._msSelections[gi], choice];
