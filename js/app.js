@@ -2504,22 +2504,23 @@ function openMultiSelectModal(item) {
       btn.textContent = choice;
       btn.dataset.group = gi;
       btn.dataset.choice = choice;
-      btn.addEventListener('click', function() {
+btn.addEventListener('click', function() {
         const sel = _msSelections[gi];
-        if (this.classList.contains('selected')) {
-          this.classList.remove('selected');
-          _msSelections[gi] = sel.filter(s => s !== choice);
-        } else {
-          if (sel.length >= group.max) {
-            if (group.max === 1) {
-              body.querySelectorAll('.ms-choice-btn[data-group="' + gi + '"].selected').forEach(b => b.classList.remove('selected'));
-              _msSelections[gi] = [];
-            } else { 
-              // Allow duplicate selections - just add again
-            }
+        if (group.max === 1) {
+          // Single select — toggle
+          if (this.classList.contains('selected')) {
+            this.classList.remove('selected');
+            _msSelections[gi] = [];
+          } else {
+            body.querySelectorAll('.ms-choice-btn[data-group="' + gi + '"].selected').forEach(b => b.classList.remove('selected'));
+            _msSelections[gi] = [choice];
+            this.classList.add('selected');
           }
+        } else {
+          // Multi select — allow duplicates, just add
+          if (sel.length >= group.max) return;
+          _msSelections[gi] = [...sel, choice];
           this.classList.add('selected');
-          _msSelections[gi] = [..._msSelections[gi], choice];
         }
         updateMsAddBtn();
       });
