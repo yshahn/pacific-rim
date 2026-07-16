@@ -1332,6 +1332,49 @@ function openMemberHistory(m, orders) {
   modal.querySelector('button').onclick = () => modal.remove();
   document.body.appendChild(modal);
 }
+function openMemberHistory(m, orders) {
+  const name = [m.firstName, m.lastName].filter(Boolean).join(' ') || '(No name)';
+  const tier = getMemberTier(m.tierPoints || m.points || 0);
+  const total = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
+      <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;">${name}</div>
+          <div style="font-size:12px;color:var(--muted);">${m.email||''}</div>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;color:${tier.color};background:${tier.bg};border-radius:20px;padding:3px 10px;">${tier.name}</span>
+            <span style="font-size:11px;color:var(--muted);">${(m.points||0).toLocaleString()} pts</span>
+            <span style="font-size:11px;color:var(--muted);">${orders.length} orders · $${total.toFixed(2)}</span>
+          </div>
+        </div>
+        <button style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+      <div style="padding:20px;">
+        ${orders.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:24px;">No orders yet.</div>' :
+          orders.sort((a,b) => (b.createdAt||0) - (a.createdAt||0)).map(o => {
+            const date = new Date(o.createdAt).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+            const items = (o.orderItems||[]).map(i => (i.emoji||'🍽️')+' '+i.name).join(', ');
+            return `<div style="padding:12px 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:600;">$${(parseFloat(o.total)||0).toFixed(2)}</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px;">${date}</div>
+                  <div style="font-size:11px;color:var(--ink);margin-top:4px;">${items}</div>
+                </div>
+                <div style="font-size:10px;color:var(--muted);flex-shrink:0;margin-left:8px;">📦 ${o.pickupTime||'ASAP'}</div>
+              </div>
+            </div>`;
+          }).join('')
+        }
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  modal.querySelector('button').onclick = () => modal.remove();
+  document.body.appendChild(modal);
+}
 function renderMembers(searchQuery) {
   const body = document.getElementById('members-body');
   const search = (searchQuery ?? document.getElementById('member-search')?.value ?? '').toLowerCase();
