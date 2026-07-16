@@ -1224,7 +1224,7 @@ async function deleteMember(id) {
   try {
     const { db } = await import('../js/firebase-menu.js');
     const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    await deleteDoc(doc(db, 'users', id));
+    await deleteDoc(doc(db, 'profiles', id));
     _allMembers = _allMembers.filter(m => m.id !== id);
     renderMembers(); renderMemChart();
     document.getElementById('ms-total').textContent = _allMembers.length;
