@@ -107,10 +107,24 @@
   .mob-nav-item.active .mob-nav-label { color: var(--gold); }
   .mob-nav-icon { font-size: 20px; filter: brightness(0.45); transition: filter 0.2s; }
   .mob-nav-label { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.35); transition: color 0.2s; }
+  @keyframes alarm-pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+#order-alarm-banner {
+  display:none; position:fixed; top:0; left:0; right:0; z-index:99999;
+  background:#c0392b; color:#fff; padding:16px 20px;
+  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700;
+  text-align:center; cursor:pointer; animation:alarm-pulse 1s infinite;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5); letter-spacing:0.02em;
+}
+.period-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--muted);}
+.period-btn.active{background:var(--ink);color:var(--gold);border-color:var(--ink);}
   </style>
 </head>
 <body class="admin-body">
 
+<!-- ══ ORDER ALARM BANNER ══ -->
+<div id="order-alarm-banner" onclick="stopAlarm()">
+  🔔 NEW ORDER! Tap here to dismiss
+</div>  
 <!-- ══ ACCESS DENIED SCREEN ══ -->
 <div id="access-denied" style="display:none; position:fixed; inset:0; background:var(--ink); flex-direction:column; align-items:center; justify-content:center; z-index:9999;">
   <div style="font-family:'Cormorant Garamond',serif; font-size:48px; color:var(--gold); margin-bottom:12px;">🔒</div>
@@ -389,90 +403,114 @@
     </div>
   </div>
 </div>
-  <!-- ══ RESERVATIONS ══ -->
+<!-- ══ RESERVATIONS ══ -->
   <div class="tab-content" id="tab-reservations">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--gold);" id="res-stat-total">—</div><div style="font-size:11px;color:var(--muted);">Total</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#27ae60;" id="res-stat-today">—</div><div style="font-size:11px;color:var(--muted);">Today</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#3498db;" id="res-stat-guests">—</div><div style="font-size:11px;color:var(--muted);">Total Guests</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#9b59b6;" id="res-stat-week">—</div><div style="font-size:11px;color:var(--muted);">This Week</div></div>
+    </div>
+    <div class="admin-card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title">📈 Reservation Trends</div>
+        <div style="display:flex;gap:6px;">
+          <button class="period-btn active" onclick="setResPeriod('week',this)">Week</button>
+          <button class="period-btn" onclick="setResPeriod('month',this)">Month</button>
+          <button class="period-btn" onclick="setResPeriod('year',this)">Year</button>
+        </div>
+      </div>
+      <div style="position:relative;height:180px;margin-top:8px;"><canvas id="res-chart"></canvas></div>
+    </div>
     <div class="admin-card">
       <div class="card-header">
-        <div class="card-title">All Reservations</div>
-        <div style="display:flex;gap:8px">
+        <div class="card-title">🗓️ All Reservations</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" class="filter-input" placeholder="Search name…" oninput="searchReservations(this.value)" id="res-search" style="width:140px;"/>
           <select class="filter-select" id="res-filter" onchange="filterReservations(this.value)">
-            <option value="all">All</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
+            <option value="all">All Time</option><option value="today">Today</option>
+            <option value="week">This Week</option><option value="month">This Month</option>
           </select>
           <button class="cta-btn-sm" onclick="loadReservations()">↻ Refresh</button>
         </div>
       </div>
-      <div id="res-stats" style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;"></div>
-      <div id="reservations-body">
-        <div class="empty-state" style="padding:32px;text-align:center;">Loading...</div>
-      </div>
+      <div id="res-stats" style="display:none;"></div>
+      <div id="reservations-body"><div class="empty-state" style="padding:32px;text-align:center;">Loading...</div></div>
     </div>
   </div>
 
-  <!-- ══ ORDERS ══ -->
+<!-- ══ ORDERS ══ -->
   <div class="tab-content" id="tab-orders">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--gold);" id="ord-stat-revenue">—</div><div style="font-size:11px;color:var(--muted);">Total Revenue</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#27ae60;" id="ord-stat-today">—</div><div style="font-size:11px;color:var(--muted);">Today's Revenue</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#3498db;" id="ord-stat-count">—</div><div style="font-size:11px;color:var(--muted);">Total Orders</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#9b59b6;" id="ord-stat-avg">—</div><div style="font-size:11px;color:var(--muted);">Avg Order</div></div>
+    </div>
+    <div class="admin-card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title">💰 Revenue Trends</div>
+        <div style="display:flex;gap:6px;">
+          <button class="period-btn active" onclick="setOrdPeriod('week',this)">Week</button>
+          <button class="period-btn" onclick="setOrdPeriod('month',this)">Month</button>
+          <button class="period-btn" onclick="setOrdPeriod('year',this)">Year</button>
+        </div>
+      </div>
+      <div style="position:relative;height:180px;margin-top:8px;"><canvas id="ord-chart"></canvas></div>
+    </div>
     <div class="admin-card">
       <div class="card-header">
-        <div class="card-title">All Orders</div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div class="card-title">🍱 All Orders</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" class="filter-input" placeholder="Search name…" oninput="searchOrders(this.value)" id="ord-search" style="width:140px;"/>
           <select class="filter-select" id="orders-filter" onchange="filterOrders(this.value)">
-            <option value="all">All Orders</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
+            <option value="all">All Time</option><option value="today">Today</option>
+            <option value="week">This Week</option><option value="month">This Month</option>
           </select>
           <button class="cta-btn-sm" onclick="loadOrders()">↻ Refresh</button>
         </div>
       </div>
-      <div id="orders-stats" style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;"></div>
-      <div id="orders-body">
-        <div class="empty-state" style="padding:32px;text-align:center;">Loading orders...</div>
-      </div>
+      <div id="orders-stats" style="display:none;"></div>
+      <div id="orders-body"><div class="empty-state" style="padding:32px;text-align:center;">Loading orders...</div></div>
     </div>
   </div>
 
-  <!-- ══ MEMBERS ══ -->
+<!-- ══ MEMBERS ══ -->
   <div class="tab-content" id="tab-members">
-    <!-- Stats row -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" id="member-stats-row">
-      <div class="admin-card" style="padding:16px;text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:var(--gold);" id="ms-total">—</div>
-        <div style="font-size:11px;color:var(--muted);">Total Members</div>
-      </div>
-      <div class="admin-card" style="padding:16px;text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#c8a96e;" id="ms-gold">—</div>
-        <div style="font-size:11px;color:var(--muted);">🥇 Gold</div>
-      </div>
-      <div class="admin-card" style="padding:16px;text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#aaa;" id="ms-silver">—</div>
-        <div style="font-size:11px;color:var(--muted);">🥈 Silver</div>
-      </div>
-      <div class="admin-card" style="padding:16px;text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#cd7f32;" id="ms-bronze">—</div>
-        <div style="font-size:11px;color:var(--muted);">🥉 Bronze</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;" id="member-stats-row">
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--gold);" id="ms-total">—</div><div style="font-size:11px;color:var(--muted);">Total Members</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#c8a96e;" id="ms-gold">—</div><div style="font-size:11px;color:var(--muted);">🥇 Gold</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#aaa;" id="ms-silver">—</div><div style="font-size:11px;color:var(--muted);">🥈 Silver</div></div>
+      <div class="admin-card" style="padding:16px;text-align:center;"><div style="font-size:22px;font-weight:700;color:#cd7f32;" id="ms-bronze">—</div><div style="font-size:11px;color:var(--muted);">🥉 Bronze</div></div>
+    </div>
+    <div class="admin-card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">👤 Member Tier Distribution</div></div>
+      <div style="display:flex;align-items:center;gap:24px;padding:16px 0;flex-wrap:wrap;">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0;"><canvas id="mem-chart"></canvas></div>
+        <div id="mem-legend" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
       </div>
     </div>
     <div class="admin-card">
       <div class="card-header">
         <div class="card-title">👤 Member Directory</div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <input type="text" class="filter-input" placeholder="Search name or email…" oninput="filterMembers(this.value)" id="member-search"/>
+          <select class="filter-select" id="member-sort" onchange="renderMembers()">
+            <option value="points">By Points</option>
+            <option value="name">By Name</option>
+            <option value="joined">By Join Date</option>
+          </select>
           <button class="cta-btn-sm" onclick="loadMembers()" style="white-space:nowrap;">↻ Refresh</button>
         </div>
       </div>
-      <!-- Filter pills -->
       <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
         <button class="cat-filter-btn active" onclick="setMemberFilter('all',this)">All</button>
+        <button class="cat-filter-btn" onclick="setMemberFilter('platinum',this)">💎 Platinum</button>
         <button class="cat-filter-btn" onclick="setMemberFilter('gold',this)">🥇 Gold</button>
         <button class="cat-filter-btn" onclick="setMemberFilter('silver',this)">🥈 Silver</button>
         <button class="cat-filter-btn" onclick="setMemberFilter('bronze',this)">🥉 Bronze</button>
       </div>
-      <div id="members-body">
-        <div style="padding:40px;text-align:center;color:var(--muted);">
-          <div style="font-size:32px;margin-bottom:8px;">👤</div>
-          Loading members…
-        </div>
-      </div>
+      <div id="members-body"><div style="padding:40px;text-align:center;color:var(--muted);"><div style="font-size:32px;margin-bottom:8px;">👤</div>Loading members…</div></div>
     </div>
   </div>
 
@@ -960,8 +998,8 @@ function showAdminPanel(email) {
   document.getElementById('admin-user-email').textContent = email;
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-  loadDashboard();
-  renderPicksList();
+loadDashboard(); renderPicksList();
+startOrderAlarmListener().catch(e => console.warn('Alarm listener error:', e));
 }
 
 function attemptAdminLogin() {
@@ -1127,30 +1165,51 @@ function renderDashboardReservations(reservations) {
 // ── MEMBERS ──
 let _allMembers = [];
 let _memberFilter = 'all';
+let _memChartInst = null;
 const TIERS_ADMIN = [
-  { name:'Bronze', min:0,    color:'#cd7f32', bg:'#fdf3e7' },
-  { name:'Silver', min:1000, color:'#aaa',    bg:'#f5f5f5' },
-  { name:'Gold',   min:2000, color:'#c8a96e', bg:'#fef9ee' },
-  { name:'Platinum',min:3000,color:'#5b8fa8', bg:'#e8f4f8' },
+  { name: 'Bronze',   min: 0,    color: '#cd7f32', bg: '#fdf3e7' },
+  { name: 'Silver',   min: 1000, color: '#aaa',    bg: '#f5f5f5' },
+  { name: 'Gold',     min: 2000, color: '#c8a96e', bg: '#fef9ee' },
+  { name: 'Platinum', min: 3000, color: '#5b8fa8', bg: '#e8f4f8' },
 ];
-function getMemberTier(tp) {
-  return [...TIERS_ADMIN].reverse().find(t => (tp||0) >= t.min) || TIERS_ADMIN[0];
-}
+function getMemberTier(tp) { return [...TIERS_ADMIN].reverse().find(t => (tp || 0) >= t.min) || TIERS_ADMIN[0]; }
 
 async function loadMembers() {
   const body = document.getElementById('members-body');
-  body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);"><div style="font-size:28px;margin-bottom:8px;">⏳</div>Loading members from Firebase…</div>';
+  body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">⏳ Loading members…</div>';
   try {
     const fbUrl = window.location.origin + '/js/firebase-menu.js';
     const { loadAllMembersFromFirebase } = await import(fbUrl + '?v=' + Date.now());
     const members = await loadAllMembersFromFirebase();
-    // Filter out non-user docs (e.g. menu config docs that might be in profiles)
     _allMembers = members.filter(m => m.email || m.firstName || m.lastName);
     renderMembers();
+    await loadChartJs();
+    renderMemChart();
   } catch(e) {
-    console.error('Load members error:', e);
-    body.innerHTML = '<div style="padding:40px;text-align:center;color:#c0392b;">❌ Failed to load members. Check Firebase connection.</div>';
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#c0392b;">❌ Failed to load members.</div>';
   }
+}
+
+function renderMemChart() {
+  if (!window.Chart) return;
+  const canvas = document.getElementById('mem-chart');
+  if (!canvas) return;
+  if (_memChartInst) { _memChartInst.destroy(); _memChartInst = null; }
+  const counts = TIERS_ADMIN.map(t => _allMembers.filter(m => getMemberTier(m.tierPoints || m.points || 0).name === t.name).length);
+  const legend = document.getElementById('mem-legend');
+  if (legend) {
+    legend.innerHTML = TIERS_ADMIN.map((t, i) => `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0;"></div>
+        <span style="color:${t.color};font-weight:600;">${t.name}</span>
+        <span style="color:var(--muted);">${counts[i]} members</span>
+      </div>`).join('');
+  }
+  _memChartInst = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: TIERS_ADMIN.map(t => t.name), datasets: [{ data: counts, backgroundColor: TIERS_ADMIN.map(t => t.color), borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+  });
 }
 
 function setMemberFilter(filter, btn) {
@@ -1159,79 +1218,52 @@ function setMemberFilter(filter, btn) {
   if (btn) btn.classList.add('active');
   renderMembers();
 }
+function filterMembers(query) { renderMembers(query); }
 
-function filterMembers(query) {
-  renderMembers(query);
+async function deleteMember(id) {
+  try {
+    const { db } = await import('../js/firebase-menu.js');
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await deleteDoc(doc(db, 'users', id));
+    _allMembers = _allMembers.filter(m => m.id !== id);
+    renderMembers(); renderMemChart();
+    document.getElementById('ms-total').textContent = _allMembers.length;
+    showToast('🗑️ Member deleted');
+  } catch(e) { showToast('🔴 Failed to delete', 'error'); }
 }
 
 function renderMembers(searchQuery) {
   const body = document.getElementById('members-body');
   const search = (searchQuery ?? document.getElementById('member-search')?.value ?? '').toLowerCase();
-
+  const sortBy = document.getElementById('member-sort')?.value || 'points';
   let filtered = _allMembers.filter(m => {
-    if (_memberFilter !== 'all') {
-      const tier = getMemberTier(m.tierPoints || m.points || 0);
-      if (tier.name.toLowerCase() !== _memberFilter) return false;
-    }
-    if (search) {
-      const name = ((m.firstName||'') + ' ' + (m.lastName||'')).toLowerCase();
-      const email = (m.email||'').toLowerCase();
-      if (!name.includes(search) && !email.includes(search)) return false;
-    }
+    if (_memberFilter !== 'all') { const tier = getMemberTier(m.tierPoints || m.points || 0); if (tier.name.toLowerCase() !== _memberFilter) return false; }
+    if (search) { const name = ((m.firstName||'')+(m.lastName||'')).toLowerCase(); const email = (m.email||'').toLowerCase(); if (!name.includes(search) && !email.includes(search)) return false; }
     return true;
   });
-
-  // Sort by points desc
-  filtered.sort((a,b) => (b.points||0) - (a.points||0));
-
-  // Update stats
-  document.getElementById('ms-total').textContent  = _allMembers.length;
-  document.getElementById('ms-gold').textContent   = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name==='Gold').length;
-  document.getElementById('ms-silver').textContent = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name==='Silver').length;
-  document.getElementById('ms-bronze').textContent = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name==='Bronze').length;
+  if (sortBy === 'points') filtered.sort((a, b) => (b.points||0) - (a.points||0));
+  else if (sortBy === 'name') filtered.sort((a, b) => ((a.firstName||'')+(a.lastName||'')).localeCompare((b.firstName||'')+(b.lastName||'')));
+  else if (sortBy === 'joined') filtered.sort((a, b) => (b.createdAt||0) - (a.createdAt||0));
+  document.getElementById('ms-total').textContent = _allMembers.length;
+  document.getElementById('ms-gold').textContent = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name === 'Gold').length;
+  document.getElementById('ms-silver').textContent = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name === 'Silver').length;
+  document.getElementById('ms-bronze').textContent = _allMembers.filter(m => getMemberTier(m.tierPoints||m.points||0).name === 'Bronze').length;
   document.getElementById('stat-members').textContent = _allMembers.length;
-
-  if (filtered.length === 0) {
-    body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">' +
-      (search || _memberFilter !== 'all' ? '🔍 No members match your filter.' : '👤 No members yet. Guests who sign up will appear here.') +
-      '</div>';
-    return;
-  }
-
+  if (!filtered.length) { body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">No members match your filter.</div>'; return; }
   body.innerHTML = '';
   filtered.forEach(m => {
-    const tier  = getMemberTier(m.tierPoints || m.points || 0);
-    const name  = [m.firstName, m.lastName].filter(Boolean).join(' ') || '(No name)';
-    const initials = ((m.firstName||'?')[0] + (m.lastName||'?')[0]).toUpperCase();
+    const tier = getMemberTier(m.tierPoints||m.points||0);
+    const name = [m.firstName, m.lastName].filter(Boolean).join(' ') || '(No name)';
+    const initials = ((m.firstName||'?')[0]+(m.lastName||'?')[0]).toUpperCase();
     const joined = m.createdAt ? new Date(m.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
     const lastSeen = m.updatedAt ? new Date(m.updatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
-    const pts   = (m.points || 0).toLocaleString();
-    const tierPts = (m.tierPoints || m.points || 0).toLocaleString();
-
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0ebe2;';
-    row.innerHTML =
-      // Avatar
-      '<div style="width:42px;height:42px;border-radius:50%;background:' + tier.bg + ';border:2px solid ' + tier.color + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:' + tier.color + ';flex-shrink:0;">' + initials + '</div>' +
-      // Info
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:14px;font-weight:500;">' + name + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:1px;">' + (m.email||'') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);">' + (m.phone||'') + '</div>' +
-      '</div>' +
-      // Tier badge
-      '<div style="text-align:center;flex-shrink:0;">' +
-        '<div style="font-size:11px;font-weight:700;color:' + tier.color + ';background:' + tier.bg + ';border-radius:20px;padding:3px 10px;margin-bottom:3px;">' + tier.name + '</div>' +
-        '<div style="font-size:12px;font-weight:600;color:var(--gold);">' + pts + ' pts</div>' +
-        '<div style="font-size:10px;color:var(--muted);">' + tierPts + ' tier pts</div>' +
-      '</div>' +
-      // Joined
-      '<div style="text-align:right;flex-shrink:0;min-width:70px;">' +
-        '<div style="font-size:10px;color:var(--muted);">Joined</div>' +
-        '<div style="font-size:11px;">' + joined + '</div>' +
-        '<div style="font-size:10px;color:var(--muted);margin-top:4px;">Last seen</div>' +
-        '<div style="font-size:11px;">' + lastSeen + '</div>' +
-      '</div>';
+    const pts = (m.points||0).toLocaleString();
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0ebe2;';
+    row.innerHTML = '<div style="width:42px;height:42px;border-radius:50%;background:'+tier.bg+';border:2px solid '+tier.color+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:'+tier.color+';flex-shrink:0;">'+initials+'</div>'+
+      '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">'+name+'</div><div style="font-size:11px;color:var(--muted);">'+(m.email||'')+'</div></div>'+
+      '<div style="text-align:center;flex-shrink:0;"><div style="font-size:11px;font-weight:700;color:'+tier.color+';background:'+tier.bg+';border-radius:20px;padding:3px 10px;margin-bottom:3px;">'+tier.name+'</div><div style="font-size:12px;font-weight:600;color:var(--gold);">'+pts+' pts</div></div>'+
+      '<div style="text-align:right;flex-shrink:0;min-width:70px;"><div style="font-size:10px;color:var(--muted);">Joined</div><div style="font-size:11px;">'+joined+'</div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Last seen</div><div style="font-size:11px;">'+lastSeen+'</div></div>'+
+      '<button onclick="deleteMember(\''+(m.id||'')+'\')" style="padding:6px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;flex-shrink:0;margin-left:4px;">🗑</button>';
     body.appendChild(row);
   });
 }
@@ -1385,18 +1417,354 @@ const pickupStyle=document.createElement('style');
 pickupStyle.textContent=`.prep-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s;color:var(--muted);}.prep-btn:hover{border-color:var(--gold);color:var(--ink);}.prep-btn.active{background:var(--ink);color:var(--gold);border-color:var(--ink);}`;
 document.head.appendChild(pickupStyle);
 
+// ── CHART.JS LOADER
+let _chartJsLoaded = false;
+async function loadChartJs() {
+  if (_chartJsLoaded || window.Chart) { _chartJsLoaded = true; return; }
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    s.onload = () => { _chartJsLoaded = true; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
 // ── RESERVATIONS
 let allReservations = [];
-async function loadReservations(){const body=document.getElementById('reservations-body');if(body)body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';try{const{loadReservationsFromFirebase}=await import('../js/firebase-menu.js');allReservations=await loadReservationsFromFirebase(100);renderReservations(allReservations);}catch(e){if(body)body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">No reservations or Firebase error.</div>';}}
-function filterReservations(period){const now=Date.now();const DAY=86400000;const WEEK=7*DAY;renderReservations(allReservations.filter(r=>{if(period==='today')return(now-r.createdAt)<DAY;if(period==='week')return(now-r.createdAt)<WEEK;return true;}));}
-function renderReservations(reservations){const body=document.getElementById('reservations-body');const stats=document.getElementById('res-stats');if(!body)return;const totalGuests=reservations.reduce((s,r)=>s+(r.guests||0),0);if(stats){stats.innerHTML=`<div class="stat-card" style="flex:1;min-width:120px;padding:12px 16px;"><div class="stat-value" style="font-size:20px;">${reservations.length}</div><div class="stat-label">Reservations</div></div><div class="stat-card" style="flex:1;min-width:120px;padding:12px 16px;"><div class="stat-value" style="font-size:20px;">${totalGuests}</div><div class="stat-label">Total Guests</div></div>`;}if(!reservations.length){body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">No reservations found.</div>';return;}body.innerHTML='';reservations.forEach(res=>{const date=new Date(res.createdAt).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});const card=document.createElement('div');card.style.cssText='border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--card-bg);';card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;"><div><div style="font-weight:600;font-size:15px;">${res.name||'Guest'}</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">Booked: ${date}</div></div><div style="text-align:right;"><div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;">${res.date}</div><div style="font-size:13px;color:var(--gold);">${res.time}</div></div></div><div style="display:flex;gap:16px;font-size:13px;margin-bottom:8px;"><span>👥 ${res.guests} guests</span>${res.special?'<span>📝 '+res.special+'</span>':''}</div><div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;">${res.phone?'<span>📞 '+res.phone+'</span>':''}${res.email?'<span>✉️ '+res.email+'</span>':''}</div>`;body.appendChild(card);});}
+let _resChartInst = null;
+let _resPeriod = 'week';
+
+async function loadReservations() {
+  const body = document.getElementById('reservations-body');
+  if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';
+  try {
+    const { loadReservationsFromFirebase } = await import('../js/firebase-menu.js');
+    allReservations = await loadReservationsFromFirebase(500);
+    updateResStats();
+    filterReservations(document.getElementById('res-filter')?.value || 'all');
+    await loadChartJs();
+    renderResChart(_resPeriod);
+  } catch(e) {
+    if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">No reservations or Firebase error.</div>';
+  }
+}
+
+function updateResStats() {
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('en-CA');
+  const weekAgo = Date.now() - 7 * 86400000;
+  const todayCount = allReservations.filter(r => r.date === todayStr).length;
+  const weekCount = allReservations.filter(r => r.createdAt >= weekAgo).length;
+  const totalGuests = allReservations.reduce((s, r) => s + (r.guests || 0), 0);
+  document.getElementById('res-stat-total').textContent = allReservations.length;
+  document.getElementById('res-stat-today').textContent = todayCount;
+  document.getElementById('res-stat-guests').textContent = totalGuests;
+  document.getElementById('res-stat-week').textContent = weekCount;
+}
+
+function setResPeriod(period, btn) {
+  _resPeriod = period;
+  document.querySelectorAll('#tab-reservations .period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderResChart(period);
+}
+
+function renderResChart(period) {
+  if (!window.Chart) return;
+  const canvas = document.getElementById('res-chart');
+  if (!canvas) return;
+  if (_resChartInst) { _resChartInst.destroy(); _resChartInst = null; }
+  const now = new Date();
+  let labels = [], data = [];
+  if (period === 'week') {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      const str = d.toLocaleDateString('en-CA');
+      labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+      data.push(allReservations.filter(r => r.date === str).length);
+    }
+  } else if (period === 'month') {
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      const str = d.toLocaleDateString('en-CA');
+      labels.push(i % 5 === 0 ? d.getDate() + '' : '');
+      data.push(allReservations.filter(r => r.date === str).length);
+    }
+  } else {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextM = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+      data.push(allReservations.filter(r => { if(!r.date)return false; const rd=new Date(r.date); return rd>=d&&rd<nextM; }).length);
+    }
+  }
+  _resChartInst = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Reservations', data, backgroundColor: 'rgba(201,168,76,0.7)', borderColor: '#c9a84c', borderWidth: 1, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { font: { size: 10 } }, grid: { display: false } } } }
+  });
+}
+
+function filterReservations(period) {
+  const now = Date.now(); const DAY = 86400000;
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  let filtered = allReservations;
+  if (period === 'today') filtered = allReservations.filter(r => r.date === todayStr);
+  else if (period === 'week') filtered = allReservations.filter(r => (now - r.createdAt) < 7 * DAY);
+  else if (period === 'month') filtered = allReservations.filter(r => (now - r.createdAt) < 30 * DAY);
+  const search = document.getElementById('res-search')?.value?.toLowerCase() || '';
+  if (search) filtered = filtered.filter(r => (r.name || '').toLowerCase().includes(search) || (r.phone || '').includes(search));
+  renderReservations(filtered);
+}
+
+function searchReservations(q) { filterReservations(document.getElementById('res-filter')?.value || 'all'); }
+
+async function deleteReservation(id) {
+  try {
+    const { db } = await import('../js/firebase-menu.js');
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await deleteDoc(doc(db, 'reservations', id));
+    allReservations = allReservations.filter(r => r.id !== id);
+    updateResStats(); filterReservations(document.getElementById('res-filter')?.value || 'all');
+    showToast('🗑️ Reservation deleted');
+  } catch(e) { showToast('🔴 Failed to delete', 'error'); }
+}
+
+function renderReservations(reservations) {
+  const body = document.getElementById('reservations-body');
+  if (!body) return;
+  if (!reservations.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">No reservations found.</div>'; return; }
+  body.innerHTML = '';
+  reservations.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(res => {
+    const date = res.createdAt ? new Date(res.createdAt).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+    const card = document.createElement('div');
+    card.style.cssText = 'border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;background:var(--card-bg);';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div style="flex:1;"><div style="font-weight:600;font-size:15px;">${res.name||'Guest'}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Booked: ${date}</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="text-align:right;"><div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;">${res.date||'—'}</div><div style="font-size:13px;color:var(--gold);">${res.time||'—'}</div></div>
+          <button onclick="deleteReservation('${res.id}')" style="padding:6px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:13px;margin-bottom:6px;"><span>👥 ${res.guests||0} guests</span>${res.special?'<span>📝 '+res.special+'</span>':''}</div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;">${res.phone?'<span>📞 '+res.phone+'</span>':''}${res.email?'<span>✉️ '+res.email+'</span>':''}</div>`;
+    body.appendChild(card);
+  });
+}
 
 // ── ORDERS
-let allOrders=[];
-async function loadOrders(){const body=document.getElementById('orders-body');if(body)body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';try{const{loadOrdersFromFirebase}=await import('../js/firebase-menu.js');allOrders=await loadOrdersFromFirebase(100);renderOrders(allOrders);}catch(e){if(body)body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">No orders or Firebase error.</div>';}}
-function filterOrders(period){const now=Date.now();const DAY=86400000;const WEEK=7*DAY;renderOrders(allOrders.filter(o=>{if(period==='today')return(now-o.createdAt)<DAY;if(period==='week')return(now-o.createdAt)<WEEK;return true;}));}
-function renderOrders(orders){const body=document.getElementById('orders-body');const stats=document.getElementById('orders-stats');if(!body)return;const totalRev=orders.reduce((s,o)=>s+(o.total||0),0);if(stats){stats.innerHTML=`<div class="stat-card" style="flex:1;min-width:120px;padding:12px 16px;"><div class="stat-value" style="font-size:20px;">${orders.length}</div><div class="stat-label">Orders</div></div><div class="stat-card" style="flex:1;min-width:120px;padding:12px 16px;"><div class="stat-value" style="font-size:20px;">$${totalRev.toFixed(2)}</div><div class="stat-label">Revenue</div></div><div class="stat-card" style="flex:1;min-width:120px;padding:12px 16px;"><div class="stat-value" style="font-size:20px;">$${orders.length?(totalRev/orders.length).toFixed(2):'0.00'}</div><div class="stat-label">Avg Order</div></div>`;}if(!orders.length){body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);">No orders found.</div>';return;}body.innerHTML='';orders.forEach(order=>{const date=new Date(order.createdAt).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});const itemList=(order.orderItems||[]).map(i=>(i.emoji||'🍽️')+' '+i.name).join('<br>');const card=document.createElement('div');card.style.cssText='border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--card-bg);';card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-weight:600;font-size:15px;">${order.customer?.name||'Guest'} <span style="color:var(--muted);font-size:12px;font-weight:400;">#${order.orderId||'—'}</span></div><div style="font-size:12px;color:var(--muted);margin-top:3px;">🕐 ${date}</div><div style="font-size:12px;color:var(--gold);margin-top:2px;">📦 Pickup: ${order.pickupTime||'ASAP'}</div></div><div style="text-align:right;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:600;">$${(order.total||0).toFixed(2)}</div><div style="font-size:11px;color:var(--muted);">${(order.orderItems||[]).length} item${(order.orderItems||[]).length!==1?'s':''}</div></div></div><div style="font-size:12px;color:var(--ink);line-height:1.8;margin-bottom:10px;padding:10px;background:var(--bone);border-radius:8px;">${itemList}</div><div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;">${order.customer?.phone?'<span>📞 '+order.customer.phone+'</span>':''}${order.customer?.email?'<span>✉️ '+order.customer.email+'</span>':''}</div>${order.specialRequest?'<div style="margin-top:8px;padding:8px 10px;background:#fdf8f0;border-left:3px solid var(--gold);border-radius:6px;font-size:12px;color:var(--ink);">📝 <strong>Special Request:</strong> '+order.specialRequest+'</div>':''}`;body.appendChild(card);});}
+let allOrders = [];
+let _ordChartInst = null;
+let _ordPeriod = 'week';
 
+async function loadOrders() {
+  const body = document.getElementById('orders-body');
+  if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';
+  try {
+    const { loadOrdersFromFirebase } = await import('../js/firebase-menu.js');
+    allOrders = await loadOrdersFromFirebase(500);
+    updateOrdStats();
+    filterOrders(document.getElementById('orders-filter')?.value || 'all');
+    await loadChartJs();
+    renderOrdChart(_ordPeriod);
+  } catch(e) {
+    if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">No orders or Firebase error.</div>';
+  }
+}
+
+function updateOrdStats() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayEnd = todayStart + 86400000;
+  const todayOrders = allOrders.filter(o => o.createdAt >= todayStart && o.createdAt < todayEnd);
+  const totalRev = allOrders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+  const todayRev = todayOrders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+  const avg = allOrders.length ? totalRev / allOrders.length : 0;
+  document.getElementById('ord-stat-revenue').textContent = '$' + totalRev.toFixed(2);
+  document.getElementById('ord-stat-today').textContent = '$' + todayRev.toFixed(2);
+  document.getElementById('ord-stat-count').textContent = allOrders.length;
+  document.getElementById('ord-stat-avg').textContent = '$' + avg.toFixed(2);
+}
+
+function setOrdPeriod(period, btn) {
+  _ordPeriod = period;
+  document.querySelectorAll('#tab-orders .period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderOrdChart(period);
+}
+
+function renderOrdChart(period) {
+  if (!window.Chart) return;
+  const canvas = document.getElementById('ord-chart');
+  if (!canvas) return;
+  if (_ordChartInst) { _ordChartInst.destroy(); _ordChartInst = null; }
+  const now = new Date();
+  let labels = [], data = [];
+  if (period === 'week') {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); const end = start + 86400000;
+      labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+      data.push(allOrders.filter(o => o.createdAt >= start && o.createdAt < end).reduce((s, o) => s + (parseFloat(o.total) || 0), 0));
+    }
+  } else if (period === 'month') {
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); const end = start + 86400000;
+      labels.push(i % 5 === 0 ? d.getDate() + '' : '');
+      data.push(allOrders.filter(o => o.createdAt >= start && o.createdAt < end).reduce((s, o) => s + (parseFloat(o.total) || 0), 0));
+    }
+  } else {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextM = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+      data.push(allOrders.filter(o => o.createdAt >= d.getTime() && o.createdAt < nextM.getTime()).reduce((s, o) => s + (parseFloat(o.total) || 0), 0));
+    }
+  }
+  _ordChartInst = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Revenue ($)', data, borderColor: '#c9a84c', backgroundColor: 'rgba(201,168,76,0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + v.toFixed(0), font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { font: { size: 10 } }, grid: { display: false } } } }
+  });
+}
+
+function filterOrders(period) {
+  const now = Date.now(); const DAY = 86400000;
+  const todayStart = new Date().setHours(0,0,0,0);
+  let filtered = allOrders;
+  if (period === 'today') filtered = allOrders.filter(o => o.createdAt >= todayStart);
+  else if (period === 'week') filtered = allOrders.filter(o => (now - o.createdAt) < 7 * DAY);
+  else if (period === 'month') filtered = allOrders.filter(o => (now - o.createdAt) < 30 * DAY);
+  const search = document.getElementById('ord-search')?.value?.toLowerCase() || '';
+  if (search) filtered = filtered.filter(o => (o.customer?.name || '').toLowerCase().includes(search));
+  renderOrders(filtered);
+}
+
+function searchOrders(q) { filterOrders(document.getElementById('orders-filter')?.value || 'all'); }
+
+async function deleteOrder(id) {
+  try {
+    const { db } = await import('../js/firebase-menu.js');
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await deleteDoc(doc(db, 'orders', id));
+    allOrders = allOrders.filter(o => o.id !== id);
+    updateOrdStats(); filterOrders(document.getElementById('orders-filter')?.value || 'all');
+    renderOrdChart(_ordPeriod); showToast('🗑️ Order deleted');
+  } catch(e) { showToast('🔴 Failed to delete', 'error'); }
+}
+
+function renderOrders(orders) {
+  const body = document.getElementById('orders-body');
+  if (!body) return;
+  if (!orders.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">No orders found.</div>'; return; }
+  body.innerHTML = '';
+  orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(order => {
+    const date = new Date(order.createdAt).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const itemList = (order.orderItems || []).map(i => (i.emoji || '🍽️') + ' ' + i.name).join('<br>');
+    const isCompleted = order.status === 'completed';
+    const card = document.createElement('div');
+    card.style.cssText = 'border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;background:var(--card-bg);';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div style="font-weight:600;font-size:15px;">${order.customer?.name||'Guest'} <span style="color:var(--muted);font-size:12px;font-weight:400;">#${order.orderId||'—'}</span></div>
+            ${isCompleted?'<span style="font-size:10px;background:#d4edda;color:#155724;border-radius:4px;padding:2px 6px;">✅ Completed</span>':''}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">🕐 ${date}</div>
+          <div style="font-size:12px;color:var(--gold);margin-top:2px;">📦 Pickup: ${order.pickupTime||'ASAP'}</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:8px;">
+          <div style="text-align:right;">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:600;">$${(order.total||0).toFixed(2)}</div>
+            ${!isCompleted?`<button onclick="markOrderCompleted('${order.id||''}',0)" style="font-size:10px;padding:3px 8px;background:#1a1410;color:#c8a96e;border:none;border-radius:6px;cursor:pointer;margin-top:4px;">Mark Complete</button>`:''}
+          </div>
+          <button onclick="deleteOrder('${order.id}')" style="padding:6px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;flex-shrink:0;margin-top:2px;">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--ink);line-height:1.8;margin-bottom:8px;padding:10px;background:var(--bone);border-radius:8px;">${itemList}</div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;">${order.customer?.phone?'<span>📞 '+order.customer.phone+'</span>':''}${order.customer?.email?'<span>✉️ '+order.customer.email+'</span>':''}</div>
+      ${order.specialRequest?'<div style="margin-top:8px;padding:8px 10px;background:#fdf8f0;border-left:3px solid var(--gold);border-radius:6px;font-size:12px;color:var(--ink);">📝 <strong>Special Request:</strong> '+order.specialRequest+'</div>':''}`;
+    body.appendChild(card);
+  });
+}
+// ── ORDER ALARM SYSTEM
+let _alarmInterval  = null;
+let _alarmUnlocked  = false;
+let _knownOrderIds  = new Set();
+
+function _unlockAudio() {
+  if (_alarmUnlocked) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0); ctx.resume();
+  } catch(e) {}
+  _alarmUnlocked = true;
+}
+document.addEventListener('click',      _unlockAudio, { once: true });
+document.addEventListener('touchstart', _unlockAudio, { once: true });
+
+function _playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume().then(() => {
+      const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
+      o1.connect(g1); g1.connect(ctx.destination);
+      o1.type = 'sine'; o1.frequency.value = 880;
+      g1.gain.setValueAtTime(0.5, ctx.currentTime);
+      g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      o1.start(ctx.currentTime); o1.stop(ctx.currentTime + 0.3);
+
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.type = 'sine'; o2.frequency.value = 660;
+      g2.gain.setValueAtTime(0.5, ctx.currentTime + 0.35);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+      o2.start(ctx.currentTime + 0.35); o2.stop(ctx.currentTime + 0.65);
+    });
+  } catch(e) {}
+}
+
+function startAlarm(count) {
+  const banner = document.getElementById('order-alarm-banner');
+  if (banner) {
+    banner.textContent = '🔔 NEW ORDER' + (count > 1 ? 'S (' + count + ')' : '') + '! Tap here to dismiss';
+    banner.style.display = 'block';
+  }
+  if (_alarmInterval) return;
+  _playBeep();
+  _alarmInterval = setInterval(_playBeep, 5000);
+}
+
+function stopAlarm() {
+  if (_alarmInterval) { clearInterval(_alarmInterval); _alarmInterval = null; }
+  const banner = document.getElementById('order-alarm-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+async function startOrderAlarmListener() {
+  try {
+    const { listenOrders, loadOrdersFromFirebase } = await import('../js/firebase-menu.js');
+    const existing = await loadOrdersFromFirebase(200);
+    existing.forEach(o => _knownOrderIds.add(o.id));
+    console.log('🔔 Order alarm active — watching', _knownOrderIds.size, 'existing orders');
+    listenOrders(orders => {
+      const fresh = orders.filter(o => o.id && !_knownOrderIds.has(o.id) && o.status !== 'completed');
+      if (fresh.length > 0) {
+        fresh.forEach(o => _knownOrderIds.add(o.id));
+        startAlarm(fresh.length);
+        if (typeof loadDashboard === 'function') loadDashboard();
+      }
+    });
+  } catch(e) {
+    console.warn('Order alarm setup failed:', e);
+  }
+}  
 function sendBroadcast(){showToast('✅ Notification sent!');}
 function fillTemplate(val){const t={reservation:"Hi! This is a reminder for your reservation at Pacific Rim Bistro today. We look forward to seeing you!",promo:"🎉 Special offer this weekend! Show this message to your server for the discount.",points:"⚠️ Your points expire in 30 days. Visit us soon!",new:"🍣 New item on our menu — come try it this week!"};document.getElementById('notif-msg').value=t[val]||'';}
 
