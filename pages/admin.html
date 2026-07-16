@@ -1640,6 +1640,11 @@ function filterOrders(period) {
   else if (period === 'month') filtered = allOrders.filter(o => (now - o.createdAt) < 30 * DAY);
   const search = document.getElementById('ord-search')?.value?.toLowerCase() || '';
   if (search) filtered = filtered.filter(o => (o.customer?.name || '').toLowerCase().includes(search));
+  const filteredRev = filtered.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+  const filteredAvg = filtered.length ? filteredRev / filtered.length : 0;
+  document.getElementById('ord-stat-revenue').textContent = '$' + filteredRev.toFixed(2);
+  document.getElementById('ord-stat-count').textContent = filtered.length;
+  document.getElementById('ord-stat-avg').textContent = '$' + filteredAvg.toFixed(2);
   renderOrders(filtered);
 }
 
