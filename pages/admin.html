@@ -1915,6 +1915,7 @@ function stopAlarm() {
   if (_alarmInterval) { clearInterval(_alarmInterval); _alarmInterval = null; }
   const banner = document.getElementById('order-alarm-banner');
   if (banner) banner.style.display = 'none';
+  localStorage.setItem('prb_alarm_dismissed', Date.now().toString());
 }
 
 async function startOrderAlarmListener() {
@@ -1923,8 +1924,9 @@ async function startOrderAlarmListener() {
     const existing = await loadOrdersFromFirebase(200);
     existing.forEach(o => _knownOrderIds.add(o.id));
     console.log('🔔 Order alarm active — watching', _knownOrderIds.size, 'existing orders');
+const lastDismissed = parseInt(localStorage.getItem('prb_alarm_dismissed') || '0');
     listenOrders(orders => {
-      const fresh = orders.filter(o => o.id && !_knownOrderIds.has(o.id) && o.status !== 'completed');
+      const fresh = orders.filter(o => o.id && !_knownOrderIds.has(o.id) && o.status !== 'completed' && (o.createdAt || 0) > lastDismissed);
       if (fresh.length > 0) {
         fresh.forEach(o => _knownOrderIds.add(o.id));
         startAlarm(fresh.length);
