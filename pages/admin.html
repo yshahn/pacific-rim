@@ -1406,15 +1406,12 @@ const pts = (m.points||0).toLocaleString();
     const mOrderCount = mOrders.length;
     const mOrderTotal = mOrders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
 
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0ebe2;cursor:pointer;transition:background 0.15s;';
+const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:14px 0;border-bottom:1px solid #f0ebe2;cursor:pointer;transition:background 0.15s;overflow:hidden;';
     row.onmouseenter = () => row.style.background = '#faf6ee';
     row.onmouseleave = () => row.style.background = '';
     row.innerHTML =
       '<div style="width:42px;height:42px;border-radius:50%;background:'+tier.bg+';border:2px solid '+tier.color+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:'+tier.color+';flex-shrink:0;">'+initials+'</div>'+
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:14px;font-weight:500;">'+name+'</div>' +
-        '<div style="font-size:11px;color:var(--muted);">'+(m.email||'')+'</div>' +
+'<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div><div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(m.email||'')+'</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+
           (mOrderCount > 0 ? '🛍️ '+mOrderCount+' order'+(mOrderCount>1?'s':'')+' · $'+mOrderTotal.toFixed(2) : '🛍️ No orders yet') +
         '</div>' +
