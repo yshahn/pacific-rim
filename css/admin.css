@@ -381,3 +381,19 @@
   align-items: center;
   justify-content: center;
 }
+@media (max-width: 768px) {
+  .stat-card-sm {
+    padding: 6px 2px !important;
+    min-height: 48px;
+    border-radius: 8px;
+  }
+  .stat-card-sm div:first-child {
+    font-size: 14px !important;
+  }
+  .stat-card-sm div:last-child {
+    font-size: 9px !important;
+  }
+  #member-stats-row {
+    gap: 4px !important;
+  }
+}
