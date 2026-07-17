@@ -1682,9 +1682,8 @@ function searchReservations(q) { filterReservations(document.getElementById('res
 async function deleteReservation(id) {
   try {
     const { db } = await import('../js/firebase-menu.js');
-    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    <button onclick="deleteReservation('${res.firebaseId||res.id}')"
-console.log('Deleting reservation:', id);
+const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    console.log('Deleting reservation:', id);
     allReservations = allReservations.filter(r => r.id !== id);
     updateResStats(); filterReservations(document.getElementById('res-filter')?.value || 'all');
     showToast('🗑️ Reservation deleted');
