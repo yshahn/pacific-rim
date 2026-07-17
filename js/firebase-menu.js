@@ -64,7 +64,10 @@ export async function loadMenuBackups() {
     const backupsCol = collection(db, 'menu_backups');
     const q = query(backupsCol, orderBy('savedAt', 'desc'), limit(10));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ ...d.data(), docId: d.id, id: d.id }));
+    return snap.docs.map(d => {
+  const data = d.data();
+  return { ...data, firebaseId: d.id, id: d.id };
+});
   } catch(e) {
     console.error('Backup load error:', e);
     return [];
