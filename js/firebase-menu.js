@@ -165,7 +165,11 @@ export async function loadReservationsFromFirebase(limitCount = 100) {
     const resCol = collection(db, 'reservations');
     const q = query(resCol, orderBy('createdAt', 'desc'), limit(limitCount));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return snap.docs.map(d => {
+  const data = d.data();
+  data.firebaseId = d.id;
+  return data;
+});
   } catch(e) {
     console.error('Firebase reservations load error:', e);
     return [];
