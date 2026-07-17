@@ -20,11 +20,12 @@
     /* Hide desktop sidebar */
     .sidebar { display: none !important; }
 
-    /* Main takes full width */
+/* Main takes full width */
     .admin-main {
       margin-left: 0 !important;
       padding: 0 !important;
       padding-bottom: 72px !important; /* space for bottom nav */
+      overflow-x: hidden !important;
     }
 
     /* Topbar */
@@ -36,8 +37,8 @@
     }
     .topbar-title { font-size: 16px !important; }
 
-    /* Tab content */
-    .tab-content { padding: 12px 14px 16px !important; }
+/* Tab content */
+    .tab-content { padding: 12px 14px 16px !important; overflow-x: hidden !important; }
 
     /* Stat grid — 2 cols on mobile */
     .stat-grid {
