@@ -100,7 +100,7 @@
 
 /* ── TABS ── */
 .tab-content { display: none; padding: 24px 28px; }
-.tab-content.active { display: block; }
+.tab-content.active { display: block; overflow-x: hidden; max-width: 100vw; }
 
 /* ── STAT GRID ── */
 .stat-grid {
