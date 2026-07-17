@@ -1924,9 +1924,15 @@ async function startOrderAlarmListener() {
     const existing = await loadOrdersFromFirebase(200);
     existing.forEach(o => _knownOrderIds.add(o.id));
     console.log('🔔 Order alarm active — watching', _knownOrderIds.size, 'existing orders');
-const lastDismissed = parseInt(localStorage.getItem('prb_alarm_dismissed') || '0');
+const todayStart = new Date().setHours(0,0,0,0);
+    const lastDismissed = parseInt(localStorage.getItem('prb_alarm_dismissed') || '0');
     listenOrders(orders => {
-      const fresh = orders.filter(o => o.id && !_knownOrderIds.has(o.id) && o.status !== 'completed' && (o.createdAt || 0) > lastDismissed);
+      const fresh = orders.filter(o => {
+        if (!o.id || _knownOrderIds.has(o.id) || o.status === 'completed') return false;
+        if ((o.createdAt || 0) < todayStart) return false; // 오늘 오더만
+        if ((o.createdAt || 0) <= lastDismissed) return false; // dismiss 이후 오더만
+        return true;
+      });
       if (fresh.length > 0) {
         fresh.forEach(o => _knownOrderIds.add(o.id));
         startAlarm(fresh.length);
