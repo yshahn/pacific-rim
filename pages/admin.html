@@ -1038,7 +1038,7 @@ async function loadDashboard() {
   _dashRefreshInterval = setInterval(() => loadDashboard(), 60000);
 
   try {
-    const { loadOrdersFromFirebase, loadReservationsFromFirebase, loadAllMembersFromFirebase } = await import('../js/firebase-menu.js');
+    const { loadOrdersFromFirebase, loadReservationsFromFirebase, loadAllMembersFromFirebase } = await import('../js/firebase-menu.js?v=' + Date.now());
 
     // Load in parallel
     const [orders, reservations] = await Promise.all([
@@ -1598,7 +1598,7 @@ async function loadReservations() {
   const body = document.getElementById('reservations-body');
   if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';
   try {
-    const { loadReservationsFromFirebase } = await import('../js/firebase-menu.js');
+    const { loadReservationsFromFirebase } = await import('../js/firebase-menu.js?v=' + Date.now());
     allReservations = await loadReservationsFromFirebase(500);
     updateResStats();
     filterReservations(document.getElementById('res-filter')?.value || 'all');
