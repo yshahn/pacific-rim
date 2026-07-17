@@ -368,3 +368,11 @@
 }
 .cat-filter-btn:hover { background: #f0ede8; color: var(--ink); }
 .cat-filter-btn.active { background: var(--ink); color: var(--gold); border-color: var(--ink); }
+
+.stat-card-sm {
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px 4px !important;
+  border: 1px solid var(--border);
+  text-align: center;
+}
