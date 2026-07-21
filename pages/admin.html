@@ -1915,7 +1915,14 @@ function stopAlarm() {
   if (_alarmInterval) { clearInterval(_alarmInterval); _alarmInterval = null; }
   const banner = document.getElementById('order-alarm-banner');
   if (banner) banner.style.display = 'none';
-  localStorage.setItem('prb_alarm_dismissed', Date.now().toString());
+  const now = Date.now();
+  localStorage.setItem('prb_alarm_dismissed', now.toString());
+  import('../js/firebase-menu.js').then(({db}) => {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc, setDoc}) => {
+      setDoc(doc(db, 'config', 'alarm'), { dismissedAt: now }, { merge: true }).catch(() => {});
+    });
+  }).catch(() => {});
+}
 }
 
 async function startOrderAlarmListener() {
@@ -1925,12 +1932,27 @@ async function startOrderAlarmListener() {
     existing.forEach(o => _knownOrderIds.add(o.id));
     console.log('🔔 Order alarm active — watching', _knownOrderIds.size, 'existing orders');
 const todayStart = new Date().setHours(0,0,0,0);
-    const lastDismissed = parseInt(localStorage.getItem('prb_alarm_dismissed') || '0');
+    let lastDismissed = parseInt(localStorage.getItem('prb_alarm_dismissed') || '0');
+    try {
+      const { db } = await import('../js/firebase-menu.js');
+      const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const alarmRef = doc(db, 'config', 'alarm');
+      onSnapshot(alarmRef, (snap) => {
+        if (snap.exists()) {
+          const fbDismissed = snap.data().dismissedAt || 0;
+          if (fbDismissed > lastDismissed) {
+            lastDismissed = fbDismissed;
+            localStorage.setItem('prb_alarm_dismissed', fbDismissed.toString());
+            stopAlarm();
+          }
+        }
+      });
+    } catch(e) {}
     listenOrders(orders => {
       const fresh = orders.filter(o => {
         if (!o.id || _knownOrderIds.has(o.id) || o.status === 'completed') return false;
-        if ((o.createdAt || 0) < todayStart) return false; // 오늘 오더만
-        if ((o.createdAt || 0) <= lastDismissed) return false; // dismiss 이후 오더만
+        if ((o.createdAt || 0) < todayStart) return false;
+        if ((o.createdAt || 0) <= lastDismissed) return false;
         return true;
       });
       if (fresh.length > 0) {
