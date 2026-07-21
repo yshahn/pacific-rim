@@ -127,11 +127,13 @@ export async function loadOrdersFromFirebase(limitCount = 50) {
     const ordersCol = collection(db, 'orders');
     const q = query(ordersCol, orderBy('createdAt', 'desc'), limit(limitCount));
     const snap = await getDocs(q);
-    return snap.docs.map(d => {
-  const data = d.data();
-  data.firebaseId = d.id;
-  return data;
-});
+return snap.docs.map(d => {
+      const data = d.data();
+      data.firebaseId = d.id;
+      delete data.id;
+      data.id = d.id;
+      return data;
+    });
   } catch(e) {
     console.error('Firebase orders load error:', e);
     return [];
