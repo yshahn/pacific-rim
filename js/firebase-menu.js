@@ -143,7 +143,12 @@ export function listenOrders(callback) {
   const ordersCol = collection(db, 'orders');
   const q = query(ordersCol, orderBy('createdAt', 'desc'), limit(50));
   return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    callback(snap.docs.map(d => {
+      const data = d.data();
+      data.id = d.id;
+      data.firebaseId = d.id;
+      return data;
+    }));
   });
 }
 
@@ -165,11 +170,12 @@ export async function loadReservationsFromFirebase(limitCount = 100) {
     const resCol = collection(db, 'reservations');
     const q = query(resCol, orderBy('createdAt', 'desc'), limit(limitCount));
     const snap = await getDocs(q);
-    return snap.docs.map(d => {
-  const data = d.data();
-  data.firebaseId = d.id;
-  return data;
-});
+return snap.docs.map(d => {
+      const data = d.data();
+      data.firebaseId = d.id;
+      data.id = d.id;
+      return data;
+    });
   } catch(e) {
     console.error('Firebase reservations load error:', e);
     return [];
