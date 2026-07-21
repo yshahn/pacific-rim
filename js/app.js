@@ -2027,11 +2027,11 @@ function getEarnRate(user) {
 // Check yearly reset (Jan 1) — tierPoints resets, actual points balance is kept
 // Called on every app load and before any tier-sensitive operation
 function checkYearlyReset() {
+  return; // Yearly reset disabled — points & tiers are permanent
   const user = getUser();
   if (!user) return;
   const now = new Date();
   const lastReset = user.lastReset ? new Date(user.lastReset) : null;
-  // Reset if we've never reset, or if last reset was in a prior year
   const needsReset = !lastReset || lastReset.getFullYear() < now.getFullYear();
   if (needsReset) {
     const fbUrl = window.location.origin + '/js/firebase-menu.js';
@@ -2111,13 +2111,8 @@ function buildRewardsScreen() {
   }
 
   // Reset notice
-  const resetEl = document.getElementById('rewards-reset');
-  if (resetEl) {
-    const now = new Date();
-    const nextJan = new Date(now.getFullYear() + 1, 0, 1);
-    const daysLeft = Math.ceil((nextJan - now) / 86400000);
-    resetEl.textContent = '⏱ Tier resets to Bronze on Jan 1 · ' + daysLeft + ' days remaining';
-  }
+const resetEl = document.getElementById('rewards-reset');
+  if (resetEl) resetEl.style.display = 'none';
 
   // Points history
   const history = document.getElementById('points-history');
