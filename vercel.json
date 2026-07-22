@@ -7,7 +7,10 @@
 "api/notify-order.js": {
       "maxDuration": 10
     },
-    "api/private-party.js": {
+"api/private-party.js": {
+      "maxDuration": 10
+    },
+    "api/jobs.js": {
       "maxDuration": 10
     }
   },
