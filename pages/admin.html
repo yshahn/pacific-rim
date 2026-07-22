@@ -1727,8 +1727,15 @@ async function loadOrders() {
   const body = document.getElementById('orders-body');
   if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);">Loading...</div>';
   try {
-    const { loadOrdersFromFirebase } = await import('../js/firebase-menu.js');
-    allOrders = await loadOrdersFromFirebase(500);
+    const { loadOrdersFromFirebase, loadAllMembersFromFirebase } = await import('../js/firebase-menu.js');
+    const [orders, members] = await Promise.all([
+      loadOrdersFromFirebase(500),
+      _allMembers.length ? Promise.resolve(_allMembers) : loadAllMembersFromFirebase()
+    ]);
+    allOrders = orders;
+    if (!_allMembers.length && members.length) {
+      _allMembers = members.filter(m => m.email || m.firstName || m.lastName);
+    }
     updateOrdStats();
     filterOrders(document.getElementById('orders-filter')?.value || 'all');
     await loadChartJs();
