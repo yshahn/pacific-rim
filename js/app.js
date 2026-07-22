@@ -582,13 +582,28 @@ async function sendArrivedMessage(passedOrderId) {
   }
 }
 
-function initPointsRedeem() {
+async function initPointsRedeem() {
   const user = getUser();
-  const pts = user ? (user.points || 0) : 0;
+  if (!user) return;
   const section = document.getElementById('points-redeem-section');
   const btnsEl  = document.getElementById('points-redeem-btns');
   const subEl   = document.getElementById('pt-sub');
   if (!section || !btnsEl) return;
+  // Always load latest points from Firebase before showing redeem options
+  let pts = user.points || 0;
+  try {
+    const fbUrl = window.location.origin + '/js/firebase-menu.js';
+    const { loadPointsFromFirebase } = await import(fbUrl);
+    const fbPts = await loadPointsFromFirebase(user.email);
+    if (fbPts && fbPts.points !== undefined) {
+      pts = fbPts.points;
+      // Sync to localStorage
+      const updatedUser = { ...user, points: fbPts.points, tierPoints: fbPts.tierPoints || user.tierPoints || 0, pointsLog: fbPts.pointsLog || user.pointsLog || [] };
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+    }
+  } catch(e) {
+    console.warn('Could not load points from Firebase:', e);
+  }
   const maxDiscount = Math.floor(pts / 500) * 5;
   if (maxDiscount <= 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
