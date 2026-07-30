@@ -1064,7 +1064,43 @@ function adminSignOut() {
 // ── DASHBOARD
 let _dashRefreshInterval = null;
 
-async function loadDashboard() {
+// ── SERVICE TOGGLES
+async function loadServiceToggles() {
+  try {
+    const { db } = await import('../js/firebase-menu.js');
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await getDoc(doc(db, 'config', 'services'));
+    const data = snap.exists() ? snap.data() : {};
+    const resOn = data.reservations !== false;
+    const ordOn = data.orders !== false;
+    updateToggleUI('res', resOn);
+    updateToggleUI('ord', ordOn);
+  } catch(e) { console.warn('Could not load service toggles:', e); }
+}
+
+function updateToggleUI(prefix, isOn) {
+  const toggle = document.getElementById(prefix + '-toggle');
+  const track = document.getElementById(prefix + '-toggle-track');
+  const thumb = document.getElementById(prefix + '-toggle-thumb');
+  const label = document.getElementById(prefix + '-toggle-label');
+  if (toggle) toggle.checked = isOn;
+  if (track) track.style.background = isOn ? '#27ae60' : '#ccc';
+  if (thumb) thumb.style.transform = isOn ? 'translateX(24px)' : 'translateX(0)';
+  if (label) label.textContent = isOn ? '✅ Currently accepting' : '🔴 Paused';
+  if (label) label.style.color = isOn ? '#27ae60' : '#c0392b';
+}
+
+async function toggleService(service, isOn) {
+  try {
+    const { db } = await import('../js/firebase-menu.js');
+    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await setDoc(doc(db, 'config', 'services'), { [service]: isOn }, { merge: true });
+    const prefix = service === 'reservations' ? 'res' : 'ord';
+    updateToggleUI(prefix, isOn);
+    showToast(isOn ? '✅ ' + (service === 'reservations' ? 'Reservations' : 'Online Orders') + ' enabled' : '🔴 ' + (service === 'reservations' ? 'Reservations' : 'Online Orders') + ' paused');
+  } catch(e) { showToast('🔴 Failed to update', 'error'); }
+}
+  async function loadDashboard() {
   // Auto-refresh every 60 seconds
   if (_dashRefreshInterval) clearInterval(_dashRefreshInterval);
   _dashRefreshInterval = setInterval(() => loadDashboard(), 60000);
