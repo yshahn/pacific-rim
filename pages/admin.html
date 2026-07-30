@@ -1030,7 +1030,7 @@ function showAdminPanel(email) {
   document.getElementById('admin-user-email').textContent = email;
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-loadDashboard(); renderPicksList();
+loadDashboard(); loadServiceToggles(); renderPicksList();
 startOrderAlarmListener().catch(e => console.warn('Alarm listener error:', e));
 }
 
