@@ -768,9 +768,19 @@ function removeCartGroupByName(name, toppingCount) {
   if (checkoutVisible) buildCheckoutSummary();
 }
 
-function goToCheckout() {
+async function goToCheckout() {
   if (cart.length === 0) return;
-
+  // Check if online orders are enabled
+  try {
+    const fbUrl = window.location.origin + '/js/firebase-menu.js';
+    const { db } = await import(fbUrl);
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await getDoc(doc(db, 'config', 'services'));
+    if (snap.exists() && snap.data().orders === false) {
+      alert('We are temporarily not accepting online orders. Please call us at (404) 893-0018.');
+      return;
+    }
+  } catch(e) { console.warn('Could not check order status:', e); }
   const user = getUser();
   if (user) {
     // Already logged in — skip straight to checkout screen
