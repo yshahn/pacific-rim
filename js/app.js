@@ -801,6 +801,9 @@ async function goToCheckout() {
       alert('We are temporarily not accepting online orders. Please call us at (404) 893-0018.');
       return;
     }
+    // Hide banner if orders are back on
+    const banner = document.getElementById('order-paused-banner');
+    if (banner) banner.style.display = 'none';
   } catch(e) { console.warn('Could not check order status:', e); }
   const user = getUser();
   if (user) {
