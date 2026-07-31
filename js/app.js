@@ -439,6 +439,27 @@ function fillUserInfo() {
 // NAVIGATION
 // ─────────────────────────────────
 function goTo(id, pushState = true) {
+  // Check if orders are paused when navigating to order tab
+  if (id === 'order') {
+    const fbUrl = window.location.origin + '/js/firebase-menu.js';
+    import(fbUrl).then(({ db }) => {
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({ doc, getDoc }) => {
+        getDoc(doc(db, 'config', 'services')).then(snap => {
+          if (snap.exists() && snap.data().orders === false) {
+            let banner = document.getElementById('order-paused-banner');
+            if (!banner) {
+              banner = document.createElement('div');
+              banner.id = 'order-paused-banner';
+              banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;padding:16px 20px;text-align:center;font-size:15px;font-weight:600;line-height:1.5;';
+              banner.innerHTML = '⚠️ Online ordering is temporarily unavailable.<br>Please call us at <a href="tel:+14048930018" style="color:#fff;text-decoration:underline;">(404) 893-0018</a>';
+              document.body.appendChild(banner);
+            }
+            banner.style.display = 'block';
+          }
+        });
+      });
+    }).catch(() => {});
+  }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const ss = document.getElementById('success-screen');
   if (ss) ss.classList.remove('active');
