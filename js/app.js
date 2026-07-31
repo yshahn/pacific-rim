@@ -886,7 +886,7 @@ async function quickRegister() {
     email,
     phone,
     points:     500,       // $5 in rewards, usable immediately
-    tierPoints: 500,
+    tierPoints: 0,
     pointsLog:  signupBonus,
     createdAt:  Date.now(),
     lastReset:  new Date().toISOString(), // prevent checkYearlyReset() from firing immediately on a fresh signup
