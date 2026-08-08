@@ -1935,7 +1935,7 @@ const fbUrl = window.location.origin + '/js/firebase-menu.js';
       saveReservationToFirebase(reservation).catch(e => console.warn('Reservation save failed:', e));
     });
     // Send notification email
-    fetch('/api/notify-order', {
+fetch('/api/notify-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1947,6 +1947,7 @@ const fbUrl = window.location.origin + '/js/firebase-menu.js';
         special: reservation.special,
         notifEmails: getNotifEmails(),
         notifPhones: getNotifPhones(),
+        guestSmsConsent: true,
       }),
     }).catch(e => console.warn('Notify error:', e));
   } catch(e) {}
