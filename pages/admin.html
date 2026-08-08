@@ -1328,7 +1328,8 @@ function openOrderCustomerHistory(name, email) {
   const total = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
   const member = _allMembers.find(m => (m.email||'').toLowerCase() === email.toLowerCase());
   const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.style.cssText = 'position:fixed;modal.id = 'confirm-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
   modal.innerHTML = `
     <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
       <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
@@ -1795,12 +1796,40 @@ async function doSendConfirmation(id, email, phone, name) {
   const statusEl = document.getElementById('confirm-send-status');
   if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Sending...'; statusEl.style.color = 'var(--muted)'; }
   try {
-    if (email) { await fetch('/api/notify-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'reservation_confirmation', guestEmail: email, guestName: name, message: msg, notifEmails: [] }) }); }
+    // Send via notify-order API (email + SMS)
+    const customer = { name, email: email || '', phone: phone || '' };
+    await fetch('/api/notify-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        isReservation: true,
+        isConfirmationRequest: true,
+        orderId: id,
+        customer,
+        pickupTime: '',
+        orderItems: [{ name: msg }],
+        special: '',
+        notifEmails: [],
+        notifPhones: [],
+        guestSmsConsent: true,
+        confirmationMessage: msg,
+      }),
+    });
     if (statusEl) { statusEl.textContent = '✅ Confirmation sent!'; statusEl.style.color = '#27ae60'; }
     showToast('✅ Confirmation sent to ' + name);
     const confirmBtn = document.getElementById('confirm-btn-' + id);
-    if (confirmBtn) { confirmBtn.textContent = '✅ Confirmation Sent'; confirmBtn.style.background = '#e8f5e9'; confirmBtn.style.color = '#27ae60'; confirmBtn.style.borderColor = '#a8d5b5'; confirmBtn.disabled = true; confirmBtn.style.cursor = 'not-allowed'; }
-    setTimeout(() => { document.querySelector('[style*=fixed][style*=10000]')?.remove(); }, 1500);
+    if (confirmBtn) {
+      confirmBtn.textContent = '✅ Confirmation Sent';
+      confirmBtn.style.background = '#e8f5e9';
+      confirmBtn.style.color = '#27ae60';
+      confirmBtn.style.borderColor = '#a8d5b5';
+      confirmBtn.disabled = true;
+      confirmBtn.style.cursor = 'not-allowed';
+    }
+    // Close modal
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.remove();
+    else document.querySelectorAll('[style*="position:fixed"][style*="z-index:10000"]').forEach(m => m.remove());
   } catch(e) {
     if (statusEl) { statusEl.textContent = '🔴 Failed to send'; statusEl.style.color = '#c0392b'; }
     showToast('🔴 Failed to send', 'error');
