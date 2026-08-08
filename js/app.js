@@ -1890,6 +1890,14 @@ for (let m = 0; m < 60; m += 30) {
 
 
 async function confirmReservation() {
+  // Prevent double submission
+  const btn = document.getElementById('confirm-res-btn');
+  if (btn) {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    btn.style.opacity = '0.6';
+  }
   // Check if reservations are enabled
   try {
     const fbUrl = window.location.origin + '/js/firebase-menu.js';
@@ -1913,9 +1921,9 @@ async function confirmReservation() {
 const resName = resNameInput || userFullName || profileFullName || '';
   const resPhone = document.getElementById('res-phone')?.value.trim() || '';
   const resEmail = document.getElementById('res-email')?.value.trim() || '';
-  if (!resName) { alert('Please enter your name.'); return; }
-  if (!resPhone || resPhone.replace(/\D/g,'').length < 10) { alert('Please enter a valid phone number.'); return; }
-  if (!resEmail || !resEmail.includes('@')) { alert('Please enter a valid email address.'); return; }
+if (!resName) { alert('Please enter your name.'); if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reservation'; btn.style.opacity = '1'; } return; }
+  if (!resPhone || resPhone.replace(/\D/g,'').length < 10) { alert('Please enter a valid phone number.'); if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reservation'; btn.style.opacity = '1'; } return; }
+  if (!resEmail || !resEmail.includes('@')) { alert('Please enter a valid email address.'); if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reservation'; btn.style.opacity = '1'; } return; }
   const reservation = {
     id: Date.now().toString(),
     date: dateEl ? dateEl.dataset.date || dateEl.textContent.trim() : new Date().toLocaleDateString(),
