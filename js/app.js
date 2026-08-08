@@ -1930,10 +1930,25 @@ if (!resName) { alert('Please enter your name.'); if (btn) { btn.disabled = fals
 
 
   try {
-    const fbUrl = window.location.origin + '/js/firebase-menu.js';
+const fbUrl = window.location.origin + '/js/firebase-menu.js';
     import(fbUrl).then(({ saveReservationToFirebase }) => {
       saveReservationToFirebase(reservation).catch(e => console.warn('Reservation save failed:', e));
     });
+    // Send notification email
+    fetch('/api/notify-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        isReservation: true,
+        orderId: reservation.id,
+        customer: { name: reservation.name, phone: reservation.phone, email: reservation.email },
+        pickupTime: reservation.date + ' · ' + reservation.time,
+        orderItems: [{ name: 'Table for ' + reservation.guests + ' guests' }],
+        special: reservation.special,
+        notifEmails: getNotifEmails(),
+        notifPhones: getNotifPhones(),
+      }),
+    }).catch(e => console.warn('Notify error:', e));
   } catch(e) {}
   fetch('/api/notify-order', {
     method: 'POST',
