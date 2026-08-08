@@ -1775,7 +1775,12 @@ function selectResDate(dateStr, reses) {
     const bookedAt = res.createdAt ? new Date(res.createdAt).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
     const card = document.createElement('div');
     card.style.cssText = 'border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;background:var(--card-bg);';
-    card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;"><div style="flex:1;"><div style="font-weight:600;font-size:15px;">${res.name||'Guest'}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Booked: ${bookedAt}</div></div><div style="display:flex;align-items:center;gap:8px;"><div style="text-align:right;"><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold);">${res.time||'—'}</div></div><button onclick="deleteReservation('${res.firebaseId||res.id}')" style="padding:6px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">🗑</button></div></div><div style="display:flex;gap:16px;font-size:13px;margin-bottom:6px;"><span>👥 ${res.guests||0} guests</span>${res.special?'<span>📝 '+res.special+'</span>':''}</div><div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:10px;">${res.phone?'<span>📞 '+res.phone+'</span>':''}${res.email?'<span>✉️ '+res.email+'</span>':''}</div><button id="confirm-btn-${res.firebaseId||res.id}" onclick="sendResConfirmation('${res.firebaseId||res.id}','${res.name||'Guest'}','${res.phone||''}','${res.email||''}','${res.date||''}','${res.time||''}','${res.guests||0}')" style="width:100%;padding:10px;background:#e8f4ff;color:#2980b9;border:1px solid #bee3f8;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📨 Send Confirmation</button>`;
+    card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;"><div style="flex:1;"><div style="font-weight:600;font-size:15px;">${res.name||'Guest'}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Booked: ${bookedAt}</div></div><div style="display:flex;align-items:center;gap:8px;"><div style="text-align:right;"><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold);">${res.time||'—'}</div></div><button onclick="deleteReservation('${res.firebaseId||res.id}')" style="padding:6px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">🗑</button></div></div><div style="display:flex;gap:16px;font-size:13px;margin-bottom:6px;"><span>👥 ${res.guests||0} guests</span>${res.special?'<span>📝 '+res.special+'</span>':''}</div><div style="display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:10px;">${res.phone?'<span>📞 '+res.phone+'</span>':''}${res.email?'<span>✉️ '+res.email+'</span>':''}</div><button id="confirm-btn-${res.firebaseId||res.id}" 
+        onclick="${res.confirmationSent ? '' : `sendResConfirmation('${res.firebaseId||res.id}','${res.name||'Guest'}','${res.phone||''}','${res.email||''}','${res.date||''}','${res.time||''}','${res.guests||0}')`}"
+        style="width:100%;padding:10px;background:${res.confirmationSent ? '#e8f5e9' : '#e8f4ff'};color:${res.confirmationSent ? '#27ae60' : '#2980b9'};border:1px solid ${res.confirmationSent ? '#a8d5b5' : '#bee3f8'};border-radius:8px;font-size:13px;font-weight:600;cursor:${res.confirmationSent ? 'not-allowed' : 'pointer'};"
+        ${res.confirmationSent ? 'disabled' : ''}>
+        ${res.confirmationSent ? '✅ Confirmation Sent' : '📨 Send Confirmation'}
+      </button>`;
     body.appendChild(card);
   });
 }
@@ -1784,7 +1789,8 @@ async function sendResConfirmation(id, name, phone, email, date, time, guests) {
   if (!email && !phone) { showToast('⚠️ No contact info available', 'error'); return; }
   const firstName = name.split(' ')[0];
   const confirmMsg = `Hi ${firstName}! This is Pacific Rim Bistro. We wanted to reach out to confirm your reservation for ${guests} guest${guests > 1 ? 's' : ''} on ${date} at ${time}. Could you please confirm that you will still be joining us? Please reply or call us at (404) 893-0018. Thank you!`;
-  const modal = document.createElement('div');
+const modal = document.createElement('div');
+  modal.id = 'confirm-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
   modal.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:16px;">📨 Send Confirmation</div><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">To: ${name} ${email ? '· ' + email : ''} ${phone ? '· ' + phone : ''}</div><textarea id="confirm-msg-text" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.6;resize:vertical;min-height:120px;box-sizing:border-box;">${confirmMsg}</textarea><div id="confirm-send-status" style="display:none;margin-top:8px;font-size:13px;"></div><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="doSendConfirmation('${id}','${email}','${phone}','${name}')" style="flex:1;padding:12px;background:var(--ink);color:var(--gold);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Send</button><button onclick="this.closest('[style*=fixed]').remove()" style="padding:12px 20px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-size:13px;">Cancel</button></div></div>`;
   modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
@@ -1826,6 +1832,12 @@ async function doSendConfirmation(id, email, phone, name) {
       confirmBtn.disabled = true;
       confirmBtn.style.cursor = 'not-allowed';
     }
+// Save confirmation sent status to Firebase
+    try {
+      const { db } = await import('../js/firebase-menu.js');
+      const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await updateDoc(doc(db, 'reservations', id), { confirmationSent: true, confirmationSentAt: Date.now() });
+    } catch(e) { console.warn('Could not save confirmation status:', e); }
     // Close modal
     const modal = document.getElementById('confirm-modal');
     if (modal) modal.remove();
