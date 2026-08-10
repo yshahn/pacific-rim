@@ -1779,8 +1779,10 @@ function selectResDate(dateStr, reses) {
         onclick="${res.confirmationSent ? '' : `sendResConfirmation('${res.firebaseId||res.id}','${res.name||'Guest'}','${res.phone||''}','${res.email||''}','${res.date||''}','${res.time||''}','${res.guests||0}')`}"
         style="width:100%;padding:10px;background:${res.confirmationSent ? '#e8f5e9' : '#e8f4ff'};color:${res.confirmationSent ? '#27ae60' : '#2980b9'};border:1px solid ${res.confirmationSent ? '#a8d5b5' : '#bee3f8'};border-radius:8px;font-size:13px;font-weight:600;cursor:${res.confirmationSent ? 'not-allowed' : 'pointer'};"
         ${res.confirmationSent ? 'disabled' : ''}>
-        ${res.confirmationSent ? '✅ Confirmation Sent' : '📨 Send Confirmation'}
-      </button>`;
+${res.confirmationSent ? '✅ Confirmation Sent' : '📨 Send Confirmation'}
+      </button>
+      ${res.guestResponse === 'confirmed' ? '<div style="margin-top:8px;padding:8px 12px;background:#e8f5e9;border-radius:8px;font-size:13px;font-weight:600;color:#27ae60;text-align:center;">✅ Guest Confirmed — Will be joining!</div>' : ''}
+      ${res.guestResponse === 'cancelled' ? '<div style="margin-top:8px;padding:8px 12px;background:#ffebee;border-radius:8px;font-size:13px;font-weight:600;color:#c0392b;text-align:center;">❌ Guest Cancelled — Will not be coming</div>' : ''}`;
     body.appendChild(card);
   });
 }
