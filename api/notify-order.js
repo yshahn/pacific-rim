@@ -138,7 +138,7 @@ module.exports = async function handler(req, res) {
 
   // ── CONFIRMATION REQUEST ──
   if (req.body.isConfirmationRequest) {
-    const { customer, confirmationMessage, notifEmails } = req.body;
+    const { customer, confirmationMessage, orderId } = req.body;
     const guestEmail = customer?.email;
     const guestPhone = customer?.phone;
     const guestName = customer?.name || 'Guest';
