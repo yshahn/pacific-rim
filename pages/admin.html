@@ -1810,8 +1810,7 @@ async function doSendConfirmation(id, email, phone, name) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        isReservation: true,
-        isConfirmationRequest: true,
+isConfirmationRequest: true,
         orderId: id,
         customer,
         pickupTime: '',
