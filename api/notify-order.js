@@ -183,6 +183,62 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({ success: true, type: 'confirmation_request' });
   }
+  // ── CONFIRMATION REQUEST ──
+  if (req.body.isConfirmationRequest) {
+    const { customer, confirmationMessage, orderId } = req.body;
+    const guestEmail = customer?.email;
+    const guestPhone = customer?.phone;
+    const guestName = customer?.name || 'Guest';
+    const msg = confirmationMessage || '';
+    const resId = orderId || '';
+    const resName = encodeURIComponent(guestName);
+    const resDate = encodeURIComponent(customer?.date || '');
+    const resTime = encodeURIComponent(customer?.time || '');
+    const baseUrl = 'https://pacificrimatl.com';
+    const yesUrl = `${baseUrl}/api/reservation-response?id=${resId}&response=yes&name=${resName}&date=${resDate}&time=${resTime}`;
+    const noUrl = `${baseUrl}/api/reservation-response?id=${resId}&response=no&name=${resName}&date=${resDate}&time=${resTime}`;
+
+    if (guestEmail) {
+      await sendEmail({
+        to: guestEmail,
+        subject: `Reservation Confirmation Request — Pacific Rim Bistro`,
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;">
+  <div style="background:#fff;border-radius:12px;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:40px;">🗓️</div>
+      <h1 style="font-size:22px;margin:8px 0 4px;color:#0f0e0c;">Reservation Confirmation</h1>
+      <p style="font-size:16px;color:#c8a96e;margin:0;font-weight:600;">Pacific Rim Bistro</p>
+    </div>
+    <p style="font-size:15px;line-height:1.7;color:#333;">${msg}</p>
+    <div style="display:flex;gap:16px;justify-content:center;margin:28px 0;flex-wrap:wrap;">
+      <a href="${yesUrl}" style="display:inline-block;background:#27ae60;color:#fff;padding:16px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700;">✅ Yes, I'm Coming!</a>
+      <a href="${noUrl}" style="display:inline-block;background:#e74c3c;color:#fff;padding:16px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700;">❌ No, Please Cancel</a>
+    </div>
+    <div style="text-align:center;color:#bbb;font-size:12px;border-top:1px solid #eee;padding-top:16px;margin-top:24px;">
+      Pacific Rim Bistro · 303 Peachtree Center Ave, Atlanta, GA 30303<br>(404) 893-0018
+    </div>
+  </div>
+</body></html>`,
+      });
+    }
+
+    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+    if (twilioSid && twilioToken && guestPhone) {
+      const digits = guestPhone.replace(/\D/g, '');
+      const toPhone = digits.startsWith('1') ? '+' + digits : '+1' + digits;
+      const twilioAuth = 'Basic ' + Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
+      const smsWithLinks = msg + `\n\n✅ Yes: ${yesUrl}\n❌ No: ${noUrl}`;
+      await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+        method: 'POST',
+        headers: { 'Authorization': twilioAuth, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ MessagingServiceSid: 'MG709e964fc98338d4f2ca08fa20ecaa96', To: toPhone, Body: smsWithLinks }),
+      });
+    }
+
+    return res.status(200).json({ success: true, type: 'confirmation_request' });
+  }
   if (!orderItems) {
     return res.status(400).json({ error: 'Missing order data' });
   }
