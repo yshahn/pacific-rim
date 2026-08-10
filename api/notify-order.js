@@ -137,7 +137,8 @@ module.exports = async function handler(req, res) {
   }
 
   // ── CONFIRMATION REQUEST ──
-  if (req.body.isConfirmationRequest) {
+if (req.body.isConfirmationRequest) {
+    console.log('✅ isConfirmationRequest block triggered');
     const { customer, confirmationMessage, orderId } = req.body;
     const guestEmail = customer?.email;
     const guestPhone = customer?.phone;
