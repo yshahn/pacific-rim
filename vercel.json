@@ -10,7 +10,10 @@
 "api/private-party.js": {
       "maxDuration": 10
     },
-    "api/jobs.js": {
+"api/jobs.js": {
+      "maxDuration": 10
+    },
+    "api/reservation-response.js": {
       "maxDuration": 10
     }
   },
