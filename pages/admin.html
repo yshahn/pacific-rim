@@ -1794,18 +1794,18 @@ async function sendResConfirmation(id, name, phone, email, date, time, guests) {
 const modal = document.createElement('div');
   modal.id = 'confirm-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:16px;">📨 Send Confirmation</div><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">To: ${name} ${email ? '· ' + email : ''} ${phone ? '· ' + phone : ''}</div><textarea id="confirm-msg-text" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.6;resize:vertical;min-height:120px;box-sizing:border-box;">${confirmMsg}</textarea><div id="confirm-send-status" style="display:none;margin-top:8px;font-size:13px;"></div><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="doSendConfirmation('${id}','${email}','${phone}','${name}')" style="flex:1;padding:12px;background:var(--ink);color:var(--gold);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Send</button><button onclick="this.closest('[style*=fixed]').remove()" style="padding:12px 20px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-size:13px;">Cancel</button></div></div>`;
+  modal.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:16px;">📨 Send Confirmation</div><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">To: ${name} ${email ? '· ' + email : ''} ${phone ? '· ' + phone : ''}</div><textarea id="confirm-msg-text" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.6;resize:vertical;min-height:120px;box-sizing:border-box;">${confirmMsg}</textarea><div id="confirm-send-status" style="display:none;margin-top:8px;font-size:13px;"></div><div style="display:flex;gap:10px;margin-top:16px;"><button onclick="doSendConfirmation('${id}','${email}','${phone}','${name}','${date}','${time}')" style="flex:1;padding:12px;background:var(--ink);color:var(--gold);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Send</button><button onclick="this.closest('[style*=fixed]').remove()" style="padding:12px 20px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-size:13px;">Cancel</button></div></div>`;
   modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
 }
 
-async function doSendConfirmation(id, email, phone, name) {
+async function doSendConfirmation(id, email, phone, name, date, time) {
   const msg = document.getElementById('confirm-msg-text')?.value || '';
   const statusEl = document.getElementById('confirm-send-status');
   if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Sending...'; statusEl.style.color = 'var(--muted)'; }
   try {
     // Send via notify-order API (email + SMS)
-    const customer = { name, email: email || '', phone: phone || '' };
+    const customer = { name, email: email || '', phone: phone || '', date: date || '', time: time || '' };
     await fetch('/api/notify-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
