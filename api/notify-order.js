@@ -364,7 +364,7 @@ module.exports = async function handler(req, res) {
 
   if (isReservation) {
     // ── RESERVATION
-    adminSmsText = `🗓️ New Reservation!\n${customer?.name || 'Guest'} · ${pickup}\n👥 ${orderItems[0]?.name || ''}\n📞 ${phone}\n${special ? '📝 ' + special : ''}`;
+    adminSmsText = `🗓️ New Reservation! — Pacific Rim Bistro\n${customer?.name || 'Guest'} · ${pickup}\n👥 ${orderItems[0]?.name || ''}\n📞 ${phone}\n${special ? '📝 ' + special : ''}`;
     guestSmsText = `Hi ${firstName}! Your reservation at Pacific Rim Bistro is confirmed.\n📅 ${pickup}\n${orderItems[0]?.name || ''}\n${special ? '📝 ' + special : ''}\nSee you soon! 🍣`;
     adminEmailSubject = `🗓️ New Reservation — ${customer?.name || 'Guest'} · ${pickup}`;
     guestEmailSubject = `Your Reservation at Pacific Rim Bistro is Confirmed! 🗓️`;
