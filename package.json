@@ -1,0 +1,9 @@
+{
+  "name": "pacific-rim-bistro",
+  "version": "1.0.0",
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "firebase": "^10.12.0",
+    "firebase-admin": "^12.1.0"
+  }
+}
