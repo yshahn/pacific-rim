@@ -2382,6 +2382,22 @@ function formatPhone(phone) {
   return phone;
 }
 
+// Group orders ("Add guest" on the guest app): each item carries a `guest`
+// number. Returns [{ guest, items, subtotal }] sorted by guest when the order
+// has MORE THAN ONE guest, or null for a normal order (render as before).
+function groupOrderItemsByGuest(items) {
+  const byGuest = new Map();
+  (items || []).forEach(i => {
+    const g = parseInt(i && i.guest) || 1;
+    if (!byGuest.has(g)) byGuest.set(g, []);
+    byGuest.get(g).push(i);
+  });
+  if (byGuest.size <= 1) return null;
+  return [...byGuest.entries()].sort((a, b) => a[0] - b[0]).map(([guest, list]) => ({
+    guest, items: list, subtotal: list.reduce((s, i) => s + (parseFloat(i.price) || 0), 0),
+  }));
+}
+
 function renderOrders(orders) {
   const body = document.getElementById('orders-body');
   if (!body) return;
@@ -2389,10 +2405,19 @@ function renderOrders(orders) {
   body.innerHTML = '';
   orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(order => {
     const date = new Date(order.createdAt).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-    const itemList = (order.orderItems || []).map(i => {
+    const _fmtItem = i => {
       const price = i.price ? ' — $' + parseFloat(i.price).toFixed(2) : '';
       return i.name + price;
-    }).join('<br>');
+    };
+    // Group order: items listed under a header per guest (with that guest's subtotal)
+    const _guestGroups = groupOrderItemsByGuest(order.orderItems || []);
+    const itemList = _guestGroups
+      ? '<div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8a6d2f;">👥 Group order — ' + _guestGroups.length + ' guests</div>' +
+        _guestGroups.map(g =>
+          '<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.12);font-size:12px;font-weight:700;color:var(--gold);display:flex;justify-content:space-between;"><span>GUEST ' + g.guest + '</span><span>$' + g.subtotal.toFixed(2) + '</span></div>' +
+          g.items.map(_fmtItem).join('<br>')
+        ).join('')
+      : (order.orderItems || []).map(_fmtItem).join('<br>');
     const netTotal = (order.orderItems || []).reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
     const tipAmt = parseFloat(order.tip) || 0;
     const isCompleted = order.status === 'completed';
@@ -2480,11 +2505,19 @@ function printSingleOrder(orderId) {
     : '—';
 
   const items = order.orderItems || [];
-  const itemRows = items.map(i => `
+  const itemRow = i => `
     <tr>
       <td style="padding:8px 0;">${i.emoji ? i.emoji + ' ' : ''}${i.name}</td>
       <td style="padding:8px 0;text-align:right;">$${(parseFloat(i.price)||0).toFixed(2)}</td>
-    </tr>`).join('');
+    </tr>`;
+  // Group order: a header row per guest (with subtotal) so the kitchen can pack per guest
+  const guestGroups = groupOrderItemsByGuest(items);
+  const itemRows = guestGroups
+    ? guestGroups.map(g => `
+    <tr>
+      <td colspan="2" style="padding:12px 0 4px;font-weight:700;border-bottom:1px solid #000;">GUEST ${g.guest}<span style="float:right;">$${g.subtotal.toFixed(2)}</span></td>
+    </tr>` + g.items.map(itemRow).join('')).join('')
+    : items.map(itemRow).join('');
 
   const subtotal = order.subtotal !== undefined ? parseFloat(order.subtotal) : items.reduce((s,i) => s + (parseFloat(i.price)||0), 0);
   const platformFee = 1.00;
@@ -2518,6 +2551,7 @@ function printSingleOrder(orderId) {
   <div class="divider"></div>
   <div class="row"><span>Order #</span><span>${order.orderId || order.id || '—'}</span></div>
   <div class="row"><span>Date</span><span>${dateTime}</span></div>
+  ${guestGroups ? `<div class="row"><span>Group order</span><span>${guestGroups.length} guests</span></div>` : ''}
   <div class="row"><span>Customer</span><span>${order.customer?.name || 'Guest'}</span></div>
   ${order.customer?.phone ? `<div class="row"><span>Phone</span><span>${formatPhone(order.customer.phone)}</span></div>` : ''}
   <div class="row"><span>Pickup</span><span>${order.pickupTime || 'ASAP'}</span></div>
@@ -2582,7 +2616,10 @@ function printTodayOrders() {
   const totalRev = todayOrders.reduce((s, o) => s + (parseFloat(o.total)||0), 0);
   const rows = todayOrders.map((o, i) => {
     const time = new Date(o.createdAt).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true });
-    const items = (o.orderItems||[]).map(i => i.name).join(', ');
+    const _gg = groupOrderItemsByGuest(o.orderItems || []);
+    const items = _gg
+      ? '[GROUP · ' + _gg.length + ' guests] ' + _gg.map(g => 'G' + g.guest + ': ' + g.items.map(i => i.name).join(', ')).join(' | ')
+      : (o.orderItems||[]).map(i => i.name).join(', ');
     const status = o.status === 'completed' ? '✓' : '○';
     return `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 8px;">${i+1}</td><td style="padding:10px 8px;">${time}</td><td style="padding:10px 8px;font-weight:600;">${o.customer?.name||'Guest'}</td><td style="padding:10px 8px;">${o.customer?.phone?formatPhone(o.customer.phone):'—'}</td><td style="padding:10px 8px;">${o.pickupTime||'ASAP'}</td><td style="padding:10px 8px;font-size:11px;color:#555;">${items}</td><td style="padding:10px 8px;text-align:right;font-weight:600;">$${(parseFloat(o.total)||0).toFixed(2)}</td><td style="padding:10px 8px;text-align:center;">${status}</td></tr>`;
   }).join('');
