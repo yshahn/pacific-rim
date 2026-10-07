@@ -17,6 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
+  <style>#guest-chips::-webkit-scrollbar{display:none;}</style>
 </head>
 <body>
   <div class="phone-frame">
@@ -208,6 +209,8 @@
             </div>
             <div class="cart-arrow">→ Checkout</div>
           </div>
+          <!-- Group orders: pick which guest new items go to, or add another guest -->
+          <div id="guest-bar" style="display:none; margin:6px 16px 0; align-items:center; gap:8px;"></div>
           <div id="lunch-notice" style="display:none; margin:8px 20px 0; padding:10px 14px; background:#fdf8f0; border:1px solid var(--gold-light); border-radius:10px; font-size:11px; color:var(--muted);">
             🕐 Lunch served Mon–Fri · 11:30 AM – 2:00 PM
           </div>
@@ -685,7 +688,7 @@
     </div>
 
   </div>
-  <script src="js/app.js?v=20260918curbsidereq1"></script>
+  <script src="js/app.js?v=20261007groups1"></script>
   <script type="module">
     document.addEventListener('DOMContentLoaded', async () => {
       if ('serviceWorker' in navigator) {
