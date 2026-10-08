@@ -1897,6 +1897,32 @@ async function initPickupSettingsSync() {
   } catch(e) { console.warn('Pickup settings sync error:', e); }
 }
 
+// Online ordering cutoff: the LAST online order is accepted at 8:45 PM (that
+// minute included). The admin's Pickup Hours "Close" can only move this EARLIER
+// (e.g. closing early on a slow night) — it can't extend past 8:45 PM. Keeping
+// the cap in code means the new cutoff applies right away even though the admin
+// has already saved a 9:00 PM "Close" value, which would otherwise win.
+const LAST_ONLINE_ORDER_MINS = 20 * 60 + 45;
+
+function getLastOrderMins(s) {
+  const toMins = (t, fallback) => { const [h, m] = String(t || fallback).split(':').map(Number); return h * 60 + m; };
+  const openMins = toMins(s && s.open, '11:30');
+  const closeMins = toMins(s && s.close, '21:00');
+  // A "Close" at/before opening time (e.g. someone entered 12:00 AM meaning
+  // "after midnight") isn't a usable same-day cutoff — ignore it instead of
+  // locking guests out all day.
+  const adminCutoff = closeMins > openMins ? closeMins : LAST_ONLINE_ORDER_MINS;
+  return Math.min(adminCutoff, LAST_ONLINE_ORDER_MINS);
+}
+
+// True once the last online order time has passed. Also checked when the guest
+// taps Pay — the pickup-time list is only built when the checkout screen opens,
+// so a guest who opened it at 8:40 PM could otherwise still pay at 8:50 PM.
+function isPastLastOnlineOrder() {
+  const now = new Date();
+  return (now.getHours() * 60 + now.getMinutes()) > getLastOrderMins(getPickupSettings());
+}
+
 function buildPickupSlots() {
   const container = document.getElementById('pickup-time-slots');
   if (!container) return;
@@ -1915,12 +1941,12 @@ function buildPickupSlots() {
   // for a 9PM close), so it looked like "still before closing" and ASAP was
   // wrongly offered again in the middle of the night. We now also treat any
   // time before the store's opening time as closed.
-  const [closeH, closeM] = (s.close || '21:00').split(':').map(Number);
   const [openH, openM] = (s.open || '11:30').split(':').map(Number);
-  const closeMins = closeH * 60 + closeM;
+  const closeMins = getLastOrderMins(s);   // last online order time (8:45 PM cap)
   const openMins = openH * 60 + openM;
   const nowMins = now.getHours() * 60 + now.getMinutes();
-  const pastClosing = nowMins >= closeMins || nowMins < openMins;
+  // `>` not `>=`: an order placed during the 8:45 PM minute is still accepted.
+  const pastClosing = nowMins > closeMins || nowMins < openMins;
   // Lunch/dinner break — e.g. 2PM–5PM. ASAP must be blocked here too: this
   // used to only gate the "no slots yet" placeholder further down, so ASAP
   // still slipped through and let guests order during the closed window
@@ -1946,10 +1972,11 @@ function buildPickupSlots() {
   }
 
   if (s.allowSchedule !== false) {
-    // Pickup windows: 11:00AM–2:30PM and 5:00PM–9:15PM (15-min intervals)
+    // Pickup slots (15-min intervals) may START between 11:30AM–2:00PM and
+    // 5:00PM–9:00PM — so the last pickup slot is 9:00PM–9:15PM.
     const windows = [
-      { open: 11 * 60 + 30, close: 14 * 60 },        // 11:30AM – 2:00PM
-      { open: 17 * 60,      close: 21 * 60 + 15 },   // 5:00PM – 9:15PM
+      { open: 11 * 60 + 30, close: 14 * 60 },   // 11:30AM – 2:00PM
+      { open: 17 * 60,      close: 21 * 60 },   // 5:00PM – 9:00PM (last slot 9:00–9:15PM)
     ];
 
     const isMorning  = nowMins < 11 * 60;          // Before 11:00AM
@@ -1993,13 +2020,16 @@ function buildPickupSlots() {
         select.appendChild(opt);
       }
       t = new Date(t.getTime() + 15 * 60 * 1000);
-      // Stop after 9:15PM
+      // Safety stop — the window check above already limits slots to start by 9:00PM
       if (t.getHours() >= 22) break;
     }
   }
 
   const hasRealOption = Array.from(select.options).some(o => o.value !== '');
-  if (pastClosing && !hasRealOption) {
+  // After the last online order time the whole list is closed — even if a later
+  // scheduled slot would still fit — so what the guest sees matches what the
+  // Pay-time check (isPastLastOnlineOrder) will accept.
+  if (nowMins > closeMins || (pastClosing && !hasRealOption)) {
     select.innerHTML = '';
     const closedOpt = document.createElement('option');
     closedOpt.value = '';
@@ -2526,6 +2556,15 @@ async function startStripeCheckout() {
       `Sorry, lunch is only served 11:30 AM–2:00 PM, Monday–Friday, and it's outside those hours now.\n\n` +
       `Please remove from your cart: ${names}`
     );
+    return;
+  }
+
+  // Last online order cutoff, re-checked at payment time (see
+  // isPastLastOnlineOrder) — the pickup-time list was built when this screen
+  // opened, so it can be stale by the time the guest actually taps Pay.
+  if (isPastLastOnlineOrder()) {
+    alert('Sorry, online ordering has closed for tonight. Please call us at (404) 893-0018.');
+    buildPickupSlots();   // refresh the list so it now shows "Closed for online orders"
     return;
   }
 
