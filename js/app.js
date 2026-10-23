@@ -759,7 +759,7 @@ async function sendArrivedMessage(passedOrderId) {
       body: JSON.stringify({
         isArrived: true,
         orderId,
-        customer: order.customer || { name: user?.name || '', phone: user?.phone || '' },
+        customer: order.customer || { name: [user?.firstName, user?.lastName].filter(s => s && s !== 'undefined').join(' ').trim() || 'Guest', phone: user?.phone || '' },
         carModel,
         carColor,
         pickupTime: order.pickupTime || '',
