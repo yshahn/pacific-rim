@@ -165,7 +165,7 @@ module.exports = async function handler(req, res) {
     }
 
     // ── SMS notification ──
-    const smsText = `Arrived for curbside pickup! Vehicle: ${carInfo}. Phone: ${custPhone}${orderId ? '. Order #' + orderId : ''}`;
+    const smsText = `${custName} arrived for curbside pickup! Vehicle: ${carInfo}. Phone: ${custPhone}${orderId ? '. Order #' + orderId : ''}`;
 
     if (adminPhones.length > 0) {
       try {
