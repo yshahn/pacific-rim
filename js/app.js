@@ -1966,7 +1966,8 @@ function buildPickupSlots() {
   // still slipped through and let guests order during the closed window
   // between lunch and dinner service.
   const isBreakTime = nowMins >= 14 * 60 && nowMins < 17 * 60;
-  const asapBlocked = pastClosing || isBreakTime;
+  const isSaturdayBeforeDinner = now.getDay() === 6 && nowMins < 17 * 60;
+  const asapBlocked = pastClosing || isBreakTime || isSaturdayBeforeDinner;
 
   const wrap = document.createElement('div');
   wrap.style.cssText = 'position:relative;';
@@ -1988,12 +1989,12 @@ function buildPickupSlots() {
   if (s.allowSchedule !== false) {
     // Pickup slots (15-min intervals) may START between 11:30AM–2:00PM and
     // 5:00PM–9:00PM — so the last pickup slot is 9:00PM–9:15PM.
-    const windows = [
-      { open: 11 * 60 + 30, close: 14 * 60 },   // 11:30AM – 2:00PM
-      { open: 17 * 60,      close: 21 * 60 },   // 5:00PM – 9:00PM (last slot 9:00–9:15PM)
-    ];
+    const isSaturday = now.getDay() === 6;
+    const windows = isSaturday
+      ? [{ open: 17 * 60, close: 21 * 60 }]
+      : [{ open: 11 * 60 + 30, close: 14 * 60 }, { open: 17 * 60, close: 21 * 60 }];
 
-    const isMorning  = nowMins < 11 * 60;          // Before 11:00AM
+    const isMorning = nowMins < (isSaturday ? 17 * 60 : 11 * 60);
 
     if (isBreakTime || pastClosing) {
       // During break, or closed: remove ASAP, show placeholder for now
@@ -2014,7 +2015,7 @@ function buildPickupSlots() {
     let t;
     if (isMorning) {
       t = (() => { const d = new Date(now); d.setHours(11, 30, 0, 0); return d; })();
-    } else if (isBreakTime) {
+    } else if (isBreakTime || (isSaturday && nowMins < 17 * 60)) {
       t = (() => { const d = new Date(now); d.setHours(17, 0, 0, 0); return d; })();
     } else {
       t = new Date(earliest.getTime() + 15 * 60 * 1000);
