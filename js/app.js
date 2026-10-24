@@ -596,6 +596,20 @@ function reportOrderSaveFailure(orderData) {
 function goTo(id, pushState = true) {
   // Check if orders are paused when navigating to order tab
   if (id === 'order') {
+    // Sunday: closed
+    const today = new Date().getDay();
+    if (today === 0) {
+      let banner = document.getElementById('order-paused-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'order-paused-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;padding:16px 20px;text-align:center;font-size:15px;font-weight:600;line-height:1.5;';
+        banner.innerHTML = '⚠️ We are closed on Sundays.<br>Online ordering is unavailable today. Please call us at <a href="tel:+14048930018" style="color:#fff;text-decoration:underline;">(404) 893-0018</a>';
+        document.body.appendChild(banner);
+      }
+      banner.style.display = 'block';
+      return;
+    }
     const fbUrl = window.location.origin + '/js/firebase-menu.js';
     import(fbUrl).then(({ db }) => {
       import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({ doc, getDoc }) => {
@@ -2150,13 +2164,23 @@ const blackouts = await loadBlackoutDates();
   const selectedDate = new Date(rawDate.getFullYear(), rawDate.getMonth(), rawDate.getDate());
   console.log('🕐 buildTimeSlots - selectedDate:', selectedDate.toLocaleDateString('en-CA'), 'blackouts:', blackouts.length);
   const slots = [];
-  for (let h = 11; h <= 13; h++) {
-for (let m = 0; m < 60; m += 30) {
-      if (h === 11 && m < 30) continue;
-      if (h === 13 && m > 30) continue;
-      slots.push({ h, m, period: 'Lunch' });
+  const dayOfWeek = selectedDate.getDay(); // 0=Sun, 6=Sat
+  // Sunday: closed — no slots
+  if (dayOfWeek === 0) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:14px;">We are closed on Sundays.<br>Please choose another day.</div>';
+    return;
+  }
+  // Lunch only Mon-Fri
+  if (dayOfWeek !== 6) {
+    for (let h = 11; h <= 13; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        if (h === 11 && m < 30) continue;
+        if (h === 13 && m > 30) continue;
+        slots.push({ h, m, period: 'Lunch' });
+      }
     }
   }
+  // Dinner Mon-Sat (5pm+)
   for (let h = 17; h <= 20; h++) {
     for (let m = 0; m < 60; m += 30) {
       if (h === 20 && m > 30) continue;
