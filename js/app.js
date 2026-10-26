@@ -2133,7 +2133,7 @@ async function buildDates() {
     const cell = document.createElement('div');
     cell.className = 'date-cell' + (!isBlocked && firstAvailable ? ' selected' : '');
     if (isBlocked) cell.className += ' blacked-out';
-    cell.dataset.date = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    cell.dataset.date = d.toLocaleDateString('en-CA'); // ISO format: YYYY-MM-DD
     cell.innerHTML =
       '<div class="dc-day">' + d.toLocaleDateString('en-US',{weekday:'short'}) + '</div>' +
       '<div class="dc-num">' + d.getDate() + '</div>' +
