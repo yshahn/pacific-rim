@@ -2631,11 +2631,10 @@ async function startStripeCheckout() {
     return;
   }
 
-  // Validate guest info if not logged in
+  // Validate customer info (both guests and logged-in users)
   const user = getUser();
-  if (!user) {
+  {
     const firstName = (document.getElementById('gi-firstname') || {}).value.trim();
-    const lastName  = (document.getElementById('gi-lastname')  || {}).value.trim();
     const email     = (document.getElementById('gi-email')     || {}).value.trim();
     const phone     = (document.getElementById('gi-phone')     || {}).value.trim();
     if (!firstName || !/[a-zA-Z]/.test(firstName)) {
