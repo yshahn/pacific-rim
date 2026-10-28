@@ -39,15 +39,13 @@ const menuData = {
     },
     { e:'🍣', n:'Sushi Roll Combination - Pick 2', d:'Choose any 2 rolls + 1 Appetizer · w/ Miso Soup or Ginger Salad', p:16.50, img:null,
       multiSelect: [
-        { label:'Sushi Rolls (Choose 2)', required:true, max:2, choices:['California Roll', 'Spicy Crab Roll', 'Spicy Tuna Roll', 'Philadelphia Roll', 'Eel Roll', 'Shrimp Tempura Roll', 'Alaska Roll', 'TNT Roll', 'Crunch Shrimp Roll', 'Vegetable Roll', 'Salmon Avocado Roll', 'Tuna Avocado Roll', 'Negi Hamachi Roll (6pcs)', 'Tuna Roll (6pcs)', 'Salmon Roll (6pcs)', 'Avocado Roll (6pcs)', 'Cucumber Roll (6pcs)'] },
-        { label:'Appetizer', required:true, max:1, choices:['Edamame', 'Spicy Edamame', 'Fried Pork Gyoza (4pcs)', 'Spring Roll (2pcs)', 'Crispy Coconut Shrimp (4pcs)', 'Spicy Calamari', 'Chicken Satay (2 Skewers)', 'Seaweed Salad', 'Cucumber Kani Salad', 'Ika Sansai', 'Fried Oyster (4pcs)', 'Crab Rangoon (4pcs)'] },
+        { label:'Choose Any 2 (Rolls or Appetizer)', required:true, max:2, choices:['California Roll', 'Spicy Crab Roll', 'Spicy Tuna Roll', 'Philadelphia Roll', 'Eel Roll', 'Shrimp Tempura Roll', 'Alaska Roll', 'TNT Roll', 'Crunch Shrimp Roll', 'Vegetable Roll', 'Salmon Avocado Roll', 'Tuna Avocado Roll', 'Negi Hamachi Roll (6pcs)', 'Tuna Roll (6pcs)', 'Salmon Roll (6pcs)', 'Avocado Roll (6pcs)', 'Cucumber Roll (6pcs)', 'Edamame', 'Spicy Edamame', 'Fried Pork Gyoza (4pcs)', 'Spring Roll (2pcs)', 'Crispy Coconut Shrimp (4pcs)', 'Spicy Calamari', 'Chicken Satay (2 Skewers)', 'Seaweed Salad', 'Cucumber Kani Salad', 'Ika Sansai', 'Fried Oyster (4pcs)', 'Crab Rangoon (4pcs)'] },
         { label:'Soup or Salad', required:true, max:1, choices:['Miso Soup', 'Ginger Salad', 'No Soup or Salad'] },
       ]
     },
     { e:'🍣', n:'Sushi Roll Combination - Pick 3', d:'Choose any 3 rolls + 1 Appetizer · w/ Miso Soup or Ginger Salad', p:20, img:null,
       multiSelect: [
-        { label:'Sushi Rolls (Choose 3)', required:true, max:3, choices:['California Roll', 'Spicy Crab Roll', 'Spicy Tuna Roll', 'Philadelphia Roll', 'Eel Roll', 'Shrimp Tempura Roll', 'Alaska Roll', 'TNT Roll', 'Crunch Shrimp Roll', 'Vegetable Roll', 'Salmon Avocado Roll', 'Tuna Avocado Roll', 'Negi Hamachi Roll (6pcs)', 'Tuna Roll (6pcs)', 'Salmon Roll (6pcs)', 'Avocado Roll (6pcs)', 'Cucumber Roll (6pcs)'] },
-        { label:'Appetizer', required:true, max:1, choices:['Edamame', 'Spicy Edamame', 'Fried Pork Gyoza (4pcs)', 'Spring Roll (2pcs)', 'Crispy Coconut Shrimp (4pcs)', 'Spicy Calamari', 'Chicken Satay (2 Skewers)', 'Seaweed Salad', 'Cucumber Kani Salad', 'Ika Sansai', 'Fried Oyster (4pcs)', 'Crab Rangoon (4pcs)'] },
+        { label:'Choose Any 3 (Rolls or Appetizer)', required:true, max:3, choices:['California Roll', 'Spicy Crab Roll', 'Spicy Tuna Roll', 'Philadelphia Roll', 'Eel Roll', 'Shrimp Tempura Roll', 'Alaska Roll', 'TNT Roll', 'Crunch Shrimp Roll', 'Vegetable Roll', 'Salmon Avocado Roll', 'Tuna Avocado Roll', 'Negi Hamachi Roll (6pcs)', 'Tuna Roll (6pcs)', 'Salmon Roll (6pcs)', 'Avocado Roll (6pcs)', 'Cucumber Roll (6pcs)', 'Edamame', 'Spicy Edamame', 'Fried Pork Gyoza (4pcs)', 'Spring Roll (2pcs)', 'Crispy Coconut Shrimp (4pcs)', 'Spicy Calamari', 'Chicken Satay (2 Skewers)', 'Seaweed Salad', 'Cucumber Kani Salad', 'Ika Sansai', 'Fried Oyster (4pcs)', 'Crab Rangoon (4pcs)'] },
         { label:'Soup or Salad', required:true, max:1, choices:['Miso Soup', 'Ginger Salad', 'No Soup or Salad'] },
       ]
     },
@@ -3062,6 +3060,12 @@ function updateMsAddBtn() {
 
 function confirmMultiSelect() {
   if (!_msItem) return;
+  const totalSelected = _msSelections.reduce((s, arr) => s + arr.length, 0);
+  const totalMax = _msItem.totalMax || Infinity;
+  if (totalSelected > totalMax) {
+    alert(`Please select a maximum of ${totalMax} items total.`);
+    return;
+  }
   const parts = _msItem.multiSelect.flatMap((g, i) => _msSelections[i]).filter(Boolean);
   const name = _msItem.n + ' (' + parts.join(', ') + ')';
   addToCart(name, _msItem.p, _msItem.e, null);
