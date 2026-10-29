@@ -3060,12 +3060,6 @@ function updateMsAddBtn() {
 
 function confirmMultiSelect() {
   if (!_msItem) return;
-  const totalSelected = _msSelections.reduce((s, arr) => s + arr.length, 0);
-  const totalMax = _msItem.totalMax || Infinity;
-  if (totalSelected > totalMax) {
-    alert(`Please select a maximum of ${totalMax} items total.`);
-    return;
-  }
   const parts = _msItem.multiSelect.flatMap((g, i) => _msSelections[i]).filter(Boolean);
   const name = _msItem.n + ' (' + parts.join(', ') + ')';
   addToCart(name, _msItem.p, _msItem.e, null);
