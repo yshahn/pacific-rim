@@ -3699,19 +3699,25 @@ function loadCategories() {
   return JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
 }
 
-function saveCategories(cats) {
+async function saveCategories(cats) {
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(cats));
   buildAdminCategoryTabs();
-  const fbUrl = window.location.origin + '/js/firebase-menu.js';
-  import(fbUrl + '?v=' + Date.now()).then(({ saveCategoriesToFirebase }) => {
-    if (saveCategoriesToFirebase) {
-      saveCategoriesToFirebase(cats).then(ok => {
-        if (ok) showToast('✅ Categories synced!');
-      }).catch(() => {});
-    } else {
-      showToast('✅ Categories saved locally');
-    }
-  }).catch(() => { showToast('✅ Categories saved locally'); });
+  const failMsg = '\u26a0\ufe0f Saved on this device only - server save FAILED, order may revert. Check console.';
+  try {
+    const mod = await import(window.location.origin + '/js/firebase-menu.js?v=' + Date.now());
+    if (mod.ensureAdminAuth) await mod.ensureAdminAuth();
+    const ok = mod.saveCategoriesToFirebase ? await mod.saveCategoriesToFirebase(cats) : false;
+    if (ok) showToast('\u2705 Categories synced!'); else showToast(failMsg, 'error');
+  } catch(e) { console.error('Categories save error:', e); showToast(failMsg, 'error'); }
+}
+
+function moveCategory(idx, dir) {
+  const cats = loadCategories();
+  const to = idx + dir;
+  if (to < 0 || to >= cats.length) return;
+  [cats[idx], cats[to]] = [cats[to], cats[idx]];
+  saveCategories(cats);
+  renderCategoryManager();
 }
 
 async function loadCategoryManager() {
@@ -3744,6 +3750,8 @@ function renderCategoryManager() {
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">Tab: "${cat.label}" · ${itemCount} items</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button onclick="moveCategory(${ci},-1)" ${ci===0?'disabled':''} style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px;${ci===0?'opacity:0.3;':''}">\u25b2</button>
+        <button onclick="moveCategory(${ci},1)" ${ci===cats.length-1?'disabled':''} style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px;${ci===cats.length-1?'opacity:0.3;':''}">\u25bc</button>
         <button onclick="openEditCategoryModal('${cat.key}')" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">✏️</button>
         <button onclick="openDeleteCategoryModal('${cat.key}')" style="padding:7px 10px;border:1px solid #fde8e8;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">🗑</button>
       </div>`;
@@ -4249,18 +4257,20 @@ function saveMenuToStorage(){
 
     // Load categories config from Firebase
     try {
-      const { loadCategoriesFromFirebase } = await import('../js/firebase-menu.js');
-      const fbCats = await loadCategoriesFromFirebase();
-      if (fbCats && fbCats.length > 0) {
-        localStorage.setItem('prb_menu_categories', JSON.stringify(fbCats));
+      const { loadCategoriesChecked, saveCategoriesToFirebase } = await import('../js/firebase-menu.js');
+      const res = await loadCategoriesChecked();
+      if (res.status === 'ok' && res.data && res.data.length > 0) {
+        localStorage.setItem('prb_menu_categories', JSON.stringify(res.data));
         if (typeof buildAdminCategoryTabs === 'function') buildAdminCategoryTabs();
-      } else if (!localStorage.getItem('prb_menu_categories')) {
-        const { saveCategoriesToFirebase } = await import('../js/firebase-menu.js');
+      } else if (res.status === 'missing' && !localStorage.getItem('prb_menu_categories')) {
+        // Seed defaults ONLY when the doc is confirmed missing - never after a failed read
         const defaultCats = typeof DEFAULT_CATEGORIES !== 'undefined' ? DEFAULT_CATEGORIES : null;
         if (defaultCats) {
           localStorage.setItem('prb_menu_categories', JSON.stringify(defaultCats));
           await saveCategoriesToFirebase(defaultCats);
         }
+      } else if (res.status === 'error') {
+        console.warn('Categories: could not reach Firebase - keeping local copy, NOT seeding defaults');
       }
     } catch(e) { console.warn('Categories load error:', e); }
 
