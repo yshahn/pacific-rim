@@ -1937,6 +1937,11 @@ function isPastLastOnlineOrder() {
   return (now.getHours() * 60 + now.getMinutes()) > getLastOrderMins(getPickupSettings());
 }
 
+// ASAP pickup becomes available at these times. (Scheduled slots still follow the
+// service windows below; the Admin "Open" time no longer delays ASAP.)
+const ASAP_LUNCH_START  = 11 * 60;        // Mon-Fri, 11:00 AM
+const ASAP_DINNER_START = 16 * 60 + 30;   // every day, 4:30 PM
+
 function buildPickupSlots() {
   const container = document.getElementById('pickup-time-slots');
   if (!container) return;
@@ -1960,13 +1965,16 @@ function buildPickupSlots() {
   const openMins = openH * 60 + openM;
   const nowMins = now.getHours() * 60 + now.getMinutes();
   // `>` not `>=`: an order placed during the 8:45 PM minute is still accepted.
-  const pastClosing = nowMins > closeMins || nowMins < openMins;
+  // ASAP opens 11:00 AM on weekdays (lunch) and 4:30 PM otherwise (dinner)
+  const isWeekdayNow = now.getDay() >= 1 && now.getDay() <= 5;
+  const asapOpenMins = isWeekdayNow ? ASAP_LUNCH_START : ASAP_DINNER_START;
+  const pastClosing = nowMins > closeMins || nowMins < asapOpenMins;
   // Lunch/dinner break — e.g. 2PM–5PM. ASAP must be blocked here too: this
   // used to only gate the "no slots yet" placeholder further down, so ASAP
   // still slipped through and let guests order during the closed window
   // between lunch and dinner service.
-  const isBreakTime = nowMins >= 14 * 60 && nowMins < 17 * 60;
-  const isSaturdayBeforeDinner = now.getDay() === 6 && nowMins < 17 * 60;
+  const isBreakTime = nowMins >= 14 * 60 && nowMins < ASAP_DINNER_START;
+  const isSaturdayBeforeDinner = now.getDay() === 6 && nowMins < ASAP_DINNER_START;
   const asapBlocked = pastClosing || isBreakTime || isSaturdayBeforeDinner;
 
   const wrap = document.createElement('div');
@@ -2622,7 +2630,6 @@ async function startStripeCheckout() {
       if (!proceed) return;
     }
   } catch(e) {}
-  sessionStorage.setItem('prb_checkout_started_at', String(Date.now()));
 
   // Validate pickup time selected (break time, or closed for the day)
   const select = document.getElementById('pickup-time-select');
@@ -2703,6 +2710,10 @@ async function startStripeCheckout() {
         carModel,
         carColor,
       }));
+      // Mark "payment started" only now that we're really sending the guest to Stripe.
+      // (It used to be set before the pickup-time / contact validations, so a click that
+      // was rejected for a missing field still triggered the "already started paying" warning.)
+      try { sessionStorage.setItem('prb_checkout_started_at', String(Date.now())); } catch(e) {}
       window.location.href = data.url;
     } else { throw new Error(data.error || 'Failed to create checkout session'); }
   } catch (err) {
