@@ -404,6 +404,19 @@ export async function loadCategoriesFromFirebase() {
   return null;
 }
 
+// ── Same as loadCategoriesFromFirebase, but tells "doc missing" apart from "read failed"
+// (quota exceeded / network). Admin must never seed defaults after a failed read.
+export async function loadCategoriesChecked() {
+  try {
+    const snap = await getDoc(doc(db, 'config', 'categories'));
+    if (!snap.exists()) return { status: 'missing', data: null };
+    return { status: 'ok', data: JSON.parse(snap.data().data) };
+  } catch(e) {
+    console.error('Firebase categories load error:', e);
+    return { status: 'error', data: null };
+  }
+}
+
 // ── Load menu sections config from Firestore
 export async function loadSectionsFromFirebase() {
   try {
