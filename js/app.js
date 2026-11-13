@@ -771,7 +771,16 @@ async function sendArrivedMessage(passedOrderId) {
       body: JSON.stringify({
         isArrived: true,
         orderId,
-        customer: order.customer || { name: [user?.firstName, user?.lastName].filter(s => s && s !== 'undefined').join(' ').trim() || 'Guest', phone: user?.phone || '' },
+        customer: (() => {
+          // 1) same-session order  2) name/phone carried in the arrival link  3) signed-in profile
+          // (a fresh page opened from the email/SMS link has no _lastOrder, and guests aren't signed in)
+          if (order.customer && order.customer.name && order.customer.name !== 'Guest') return order.customer;
+          const profileName = [user?.firstName, user?.lastName].filter(s => s && s !== 'undefined').join(' ').trim();
+          return {
+            name: urlParams.get('name') || profileName || 'Guest',
+            phone: (order.customer && order.customer.phone) || urlParams.get('phone') || user?.phone || '',
+          };
+        })(),
         carModel,
         carColor,
         pickupTime: order.pickupTime || '',
