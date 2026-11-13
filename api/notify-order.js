@@ -443,7 +443,7 @@ module.exports = async function handler(req, res) {
     const carModelEnc = encodeURIComponent(req.body.carModel || '');
     const carColorEnc = encodeURIComponent(req.body.carColor || '');
     const arrivedLink = isCurbside
-      ? `\n\n🚗 Curbside Pickup — tap when you arrive:\nhttps://pacificrimatl.com?arrived=1&order=${encodeURIComponent(orderId)}&carModel=${carModelEnc}&carColor=${carColorEnc}`
+      ? `\n\n🚗 Curbside Pickup — tap when you arrive:\nhttps://pacificrimatl.com?arrived=1&order=${encodeURIComponent(orderId)}&carModel=${carModelEnc}&carColor=${carColorEnc}&name=${encodeURIComponent(customer?.name || '')}&phone=${encodeURIComponent(customer?.phone || '')}`
       : '';
     const guestItemLines = buildSafeItemLines(orderItems, 900);
     const guestPtsTxt = (parseFloat(pointsDiscount)||0) > 0 ? `  Rewards: -$${parseFloat(pointsDiscount).toFixed(2)}` : '';
@@ -585,6 +585,10 @@ function buildEmailHtml({ emoji, title, subtitle, highlight, highlightSub, highl
 }
 
 function buildOrderEmailHtml({ firstName, lastName, phone, guestEmail, pickup, itemsHtml, totalsHtml, orderRows, orderId, orderTime, orderCount, total, isAdmin, pickupType, carModel, carColor, specialReq }) {
+  // Carried in the "I Have Arrived" link so the arrival alert can name the customer even when
+  // the link is opened later, on a fresh page, by a guest who isn't signed in.
+  const _arrName  = [firstName, lastName].filter(v => v && v !== '\u2014').join(' ');
+  const _arrPhone = (phone && phone !== '\u2014') ? phone : '';
   return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"/></head>
 <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;">
@@ -612,7 +616,7 @@ function buildOrderEmailHtml({ firstName, lastName, phone, guestEmail, pickup, i
     ${pickupType === 'curbside' ? `
     <div style="text-align:center;margin-bottom:20px;">
       <p style="font-size:13px;color:#555;margin-bottom:12px;">🚗 When you arrive, tap the button below and we'll bring your order out!</p>
-      <a href="https://pacificrimatl.com?arrived=1&order=${orderId}&carModel=${encodeURIComponent(carModel)}&carColor=${encodeURIComponent(carColor)}"
+      <a href="https://pacificrimatl.com?arrived=1&order=${orderId}&carModel=${encodeURIComponent(carModel)}&carColor=${encodeURIComponent(carColor)}&name=${encodeURIComponent(_arrName)}&phone=${encodeURIComponent(_arrPhone)}"
         style="display:inline-block;background:#1a1410;color:#c8a96e;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:0.03em;">
         🚗 I Have Arrived!
       </a>
